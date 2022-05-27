@@ -2,6 +2,10 @@ FROM nvidia/cuda:10.2-cudnn8-runtime-ubuntu18.04
 
 ENV PATH="${PATH}:/home/docker/.local/bin"
 
+# Set timezone
+ENV TZ=Canada/Eastern
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 RUN apt-get update && \
     apt-get install -y sudo
 
@@ -16,8 +20,7 @@ USER docker
 RUN mkdir -p /home/docker/workspace/
 
 # Install Git, Python, and Pip
-RUN sudo apt-get update && \
-    sudo apt-get install -y software-properties-common git && \ 
+RUN sudo apt-get install -y software-properties-common git && \ 
     sudo add-apt-repository ppa:deadsnakes/ppa && \
     sudo apt-get install -y  python3.9
 
