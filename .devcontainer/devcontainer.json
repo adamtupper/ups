@@ -1,0 +1,9 @@
+{
+    "build": { "dockerfile": "Dockerfile" },
+    "containerUser": "docker",
+    "workspaceFolder": "/home/docker/workspace",
+    "workspaceMount": "source=remote-workspace-ups,target=/home/docker/workspace,type=volume",
+    "mounts": ["source=/home-local2/adtup.extra.nobkp,target=/home-local2/adtup.extra.nobkp,type=bind,consistency=cached"],
+    "runArgs": ["--gpus=all", "--ipc=host"],
+    "postCreateCommand": "cd /home/docker/workspace && git clone git@github.com:adamtupper/ups.git && cd ups/.devcontainer && bash post_create_script.sh"
+}
