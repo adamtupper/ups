@@ -19,11 +19,11 @@ USER docker
 # Create workspace directory
 RUN mkdir -p /home/docker/workspace/
 
-# Install Git, Python, and Pip
-RUN sudo apt-get install -y software-properties-common git
+# Install Git and Pip
+RUN sudo apt-get install -y software-properties-common git python3-pip
 
 # Install virtualenv
-RUN pip install virtualenv
+RUN pip3 install virtualenv
 
 # Set the working directory
 WORKDIR /home/docker/workspace/
