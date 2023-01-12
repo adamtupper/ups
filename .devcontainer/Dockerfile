@@ -20,9 +20,7 @@ USER docker
 RUN mkdir -p /home/docker/workspace/
 
 # Install Git, Python, and Pip
-RUN sudo apt-get install -y software-properties-common git && \ 
-    sudo add-apt-repository ppa:deadsnakes/ppa && \
-    sudo apt-get install -y  python3.9
+RUN sudo apt-get install -y software-properties-common git
 
 # Install virtualenv
 RUN pip install virtualenv
