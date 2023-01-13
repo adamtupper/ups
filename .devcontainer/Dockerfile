@@ -20,7 +20,7 @@ USER docker
 RUN mkdir -p /home/docker/workspace/
 
 # Install Git and Pip
-RUN sudo apt-get install -y software-properties-common git python3-pip python3.8
+RUN sudo apt-get install -y software-properties-common git python3-pip python3.8 python3.8-dev libblas3 liblapack3 liblapack-dev libblas-dev libatlas-base-dev gfortran
 
 # Install virtualenv
 RUN pip3 install virtualenv
