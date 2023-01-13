@@ -4,5 +4,5 @@
 cd ..
 
 # Setup virtual environment
-virtualenv env -p python3.6
+virtualenv env -p python3.8
 source env/bin/activate
