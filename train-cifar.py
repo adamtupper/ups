@@ -31,7 +31,8 @@ import wandb
 def main():
     run_started = datetime.today().strftime('%d-%m-%y_%H%M') #start time to create unique experiment name
     parser = argparse.ArgumentParser(description='UPS Training')
-    parser.add_argument('--out', default=f'outputs', help='directory to output the result')
+    parser.add_argument('--out', help='directory to output the result')
+    parser.add_argument('--data-dir', help='directory where the datasets are stored')
     parser.add_argument('--gpu-id', default='0', type=int,
                         help='id(s) for CUDA_VISIBLE_DEVICES')
     parser.add_argument('--num-workers', type=int, default=8,
