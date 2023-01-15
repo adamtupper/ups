@@ -1,0 +1,10 @@
+cython==0.29.33+computecanada
+numpy==1.16.4+computecanada
+scikit-learn==0.22.1+computecanada
+scipy==1.3.1+computecanada
+torch==1.6.0+computecanada
+torchvision==0.7.0+computecanada
+tqdm==4.40.2+computecanada
+tensorboardx==1.8+computecanada
+tensorboard==1.13.1+computecanada
+wandb==0.12.5+computecanada
