@@ -35,6 +35,7 @@ def main():
     parser.add_argument('--data-dir', help='directory where the datasets are stored')
     parser.add_argument('--gpu-id', default='0', type=int,
                         help='id(s) for CUDA_VISIBLE_DEVICES')
+    parser.add_argument('--n-gpu', default=1, type=int, help='number of gpus to use')
     parser.add_argument('--num-workers', type=int, default=8,
                         help='number of workers')
     parser.add_argument('--dataset', default='cifar10', type=str,
