@@ -134,7 +134,7 @@ def main():
     writer = SummaryWriter(args.out)
     
     # Initialize W&B and save args as config
-    wandb.init(config=args)
+    wandb.init(config=args, project="ups-replication")
 
     if args.dataset == 'cifar10':
         args.num_classes = 10
