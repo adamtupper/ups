@@ -5,7 +5,7 @@
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks-per-node=8
 #SBATCH --time=24:00:00
-#SBATCH --mail-user=$USER_EMAIL
+#SBATCH --mail-user=adam.tupper.1@ulaval.ca
 #SBATCH --mail-type=ALL
 
 module purge
