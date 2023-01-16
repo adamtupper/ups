@@ -255,16 +255,17 @@ def main():
                 'scheduler': scheduler.state_dict(),
             }, is_best, args.out, f'iteration_{str(itr)}')
             
-            # Save checkpoint to W&B
-            metadata = {'train/1.test_acc': test_acc, 'train/iteration': itr, 'train/epoch': epoch + 1}
-            artifact = wandb.Artifact(
-                name=f'model-{wandb.run.id}',
-                metadata=metadata, 
-                type='model'
-                )
-            artifact.add_file(os.path.join(args.out, f"checkpoint_iteration_{itr}.pth.tar"))
-            aliases = ['best'] if is_best else []
-            wandb.log_artifact(artifact, aliases=aliases)
+            if (epoch == args.epochs - 1) or (epoch % 10 == 0):
+                # Save checkpoint to W&B
+                metadata = {'train/1.test_acc': test_acc, 'train/iteration': itr, 'train/epoch': epoch + 1}
+                artifact = wandb.Artifact(
+                    name=f'model-{wandb.run.id}',
+                    metadata=metadata, 
+                    type='model'
+                    )
+                artifact.add_file(os.path.join(args.out, f"checkpoint_iteration_{itr}.pth.tar"))
+                aliases = ['best'] if is_best else []
+                wandb.log_artifact(artifact, aliases=aliases)
     
         checkpoint = torch.load(f'{args.out}/checkpoint_iteration_{str(itr)}.pth.tar')
         model.load_state_dict(checkpoint['state_dict'])
