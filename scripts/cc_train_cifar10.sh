@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --array=831552,832388,727887   # 3 random seeds
+#SBATCH --array=831552,832388,727887
 #SBATCH --mem=32000M
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
