@@ -262,7 +262,7 @@ def main():
                 type='model'
                 )
             artifact.add_file(os.path.join(args.out, f"checkpoint_{itr}.pth.tar"))
-            aliases = ['best'] if is_based else []
+            aliases = ['best'] if is_best else []
             wandb.log_artifact(artifact, aliases=aliases)
     
         checkpoint = torch.load(f'{args.out}/checkpoint_iteration_{str(itr)}.pth.tar')
