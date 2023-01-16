@@ -109,6 +109,7 @@ def main():
     print(f'value of tau_n:                           {args.tau_n}')
     print(f'value of kappa_p:                         {args.kappa_p}')
     print(f'value of kappa_n:                         {args.kappa_n}')
+    print(f'seed:                                     {args.seed}')
     print('########################################################################')
     print('########################################################################')
 

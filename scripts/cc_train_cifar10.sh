@@ -1,9 +1,10 @@
 #!/bin/bash
+#SBATCH --array=831552,832388,727887,   # 3 random seeds
 #SBATCH --mem=32G
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks-per-node=8
-#SBATCH --time=24:00:00  # TODO: Estimate how long this will take
+#SBATCH --time=24:00:00
 #SBATCH --mail-user=$USER_EMAIL
 #SBATCH --mail-type=ALL
 
@@ -30,6 +31,7 @@ python train-cifar.py \
     --data-dir $SLURM_TMPDIR/data \
     --dataset "cifar10" \
     --n-lbl 4000 \
-    --split-txt "run1" \
+    --seed $SLURM_ARRAY_TASK_ID \
+    --split-txt "run$SLURM_ARRAY_TASK_ID" \
     --arch "wideresnet" \
     --no-progress
