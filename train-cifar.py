@@ -261,7 +261,7 @@ def main():
                 metadata=metadata, 
                 type='model'
                 )
-            artifact.add_file(os.path.join(args.out, f"checkpoint_{itr}.pth.tar"))
+            artifact.add_file(os.path.join(args.out, f"checkpoint_iteration_{itr}.pth.tar"))
             aliases = ['best'] if is_best else []
             wandb.log_artifact(artifact, aliases=aliases)
     
