@@ -33,6 +33,7 @@ def main():
     parser = argparse.ArgumentParser(description='UPS Training')
     parser.add_argument('--out', help='directory to output the result')
     parser.add_argument('--data-dir', help='directory where the datasets are stored')
+    parser.add_argument('--exp-name', help='a unique ID for the experiment')
     parser.add_argument('--gpu-id', default='0', type=int,
                         help='id(s) for CUDA_VISIBLE_DEVICES')
     parser.add_argument('--n-gpu', default=1, type=int, help='number of gpus to use')
@@ -115,10 +116,8 @@ def main():
     print('########################################################################')
 
     DATASET_GETTERS = {'cifar10': get_cifar10, 'cifar100': get_cifar100}
-    exp_name = f'exp_{args.dataset}_{args.n_lbl}_{args.arch}_{args.split_txt}_{args.epchs}_{args.class_blnc}_{args.tau_p}_{args.tau_n}_{args.kappa_p}_{args.kappa_n}_{run_started}'
     device = torch.device('cuda', args.gpu_id)
     args.device = device
-    args.exp_name = exp_name
     args.dtype = torch.float32
     if args.seed != -1:
         set_seed(args)
@@ -131,11 +130,15 @@ def main():
         if len(resume_itrs) > 0:
             start_itr = max(resume_itrs)
         args.out = args.resume
+        
+        # Resume W&B tracking
+        wandb.init(id=args.exp_name, resume="allow")
+    else:
+        # Initialize W&B and save args as config
+        wandb.init(id=args.exp_name, config=args, project="ups-replication")
+        
     os.makedirs(args.out, exist_ok=True)
     writer = SummaryWriter(args.out)
-    
-    # Initialize W&B and save args as config
-    wandb.init(config=args, project="ups-replication")
 
     if args.dataset == 'cifar10':
         args.num_classes = 10

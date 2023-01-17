@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --array=831,832,727%1
+#SBATCH --array=1-7%1
 #SBATCH --mem=32000M
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
@@ -7,6 +7,21 @@
 #SBATCH --time=24:00:00
 #SBATCH --mail-user=adam.tupper.1@ulaval.ca
 #SBATCH --mail-type=ALL
+
+# Check for experiment name
+if [ -z "$1" ]
+  then
+    echo "No experiment name supplied"
+    exit 1
+fi
+
+# Print Job info
+echo "Current working directory: `pwd`"
+echo "Starting run at: `date`"
+echo ""
+echo "Job Array ID / Job ID: $SLURM_ARRAY_JOB_ID / $SLURM_JOB_ID"
+echo "This is job $SLURM_ARRAY_TASK_ID out of $SLURM_ARRAY_TASK_COUNT jobs."
+echo ""
 
 module purge
 
@@ -31,13 +46,28 @@ source $SLURM_TMPDIR/env/bin/activate
 pip install --no-index --upgrade pip
 pip install --no-index -r cc_requirements.txt
 
-# Run training script
-python train-cifar.py \
-    --out $scratch \
-    --data-dir $SLURM_TMPDIR/data \
-    --dataset "cifar10" \
-    --n-lbl 4000 \
-    --seed $SLURM_ARRAY_TASK_ID \
-    --split-txt "run$SLURM_ARRAY_TASK_ID" \
-    --arch "wideresnet" \
-    --no-progress
+if test -d "$scratch/$1"; then
+    # Resume training run
+    python train-cifar.py \
+        --out $scratch \
+        --data-dir $SLURM_TMPDIR/data \
+        --resume $scratch/$1 \
+        --exp-name $1 \
+        --dataset "cifar10" \
+        --n-lbl 4000 \
+        --seed $SLURM_ARRAY_TASK_ID \
+        --split-txt "run$SLURM_ARRAY_TASK_ID" \
+        --arch "wideresnet" \
+        --no-progress
+fi
+    # Start a new training run
+    python train-cifar.py \
+        --out $scratch \
+        --data-dir $SLURM_TMPDIR/data \
+        --exp-name $1 \
+        --dataset "cifar10" \
+        --n-lbl 4000 \
+        --seed $SLURM_ARRAY_TASK_ID \
+        --split-txt "run$SLURM_ARRAY_TASK_ID" \
+        --arch "wideresnet" \
+        --no-progress
