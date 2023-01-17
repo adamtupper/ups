@@ -132,7 +132,7 @@ def main():
         args.out = args.resume
         
         # Resume W&B tracking
-        wandb.init(id=args.exp_name, resume="allow")
+        wandb.init(id=args.exp_name, config=args, project="ups-replication", resume="allow")
     else:
         # Initialize W&B and save args as config
         wandb.init(id=args.exp_name, config=args, project="ups-replication")
