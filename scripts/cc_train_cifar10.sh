@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --array=1-7%1
+#SBATCH --array=1-2%1
 #SBATCH --mem=32000M
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks-per-node=8
-#SBATCH --time=24:00:00
+#SBATCH --time=00:30:00
 #SBATCH --mail-user=adam.tupper.1@ulaval.ca
 #SBATCH --mail-type=ALL
 
@@ -12,6 +12,13 @@
 if [ -z "$1" ]
   then
     echo "No experiment name supplied"
+    exit 1
+fi
+
+# Check for random seed
+if [ -z "$2" ]
+  then
+    echo "No seed supplied"
     exit 1
 fi
 
@@ -55,7 +62,7 @@ if test -d "$scratch/$1"; then
         --exp-name $1 \
         --dataset "cifar10" \
         --n-lbl 4000 \
-        --seed $SLURM_ARRAY_TASK_ID \
+        --seed $2 \
         --split-txt "run$SLURM_ARRAY_TASK_ID" \
         --arch "wideresnet" \
         --no-progress
@@ -67,7 +74,7 @@ fi
         --exp-name $1 \
         --dataset "cifar10" \
         --n-lbl 4000 \
-        --seed $SLURM_ARRAY_TASK_ID \
+        --seed $2 \
         --split-txt "run$SLURM_ARRAY_TASK_ID" \
         --arch "wideresnet" \
         --no-progress
