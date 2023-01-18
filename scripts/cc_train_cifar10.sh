@@ -40,8 +40,8 @@ mkdir -p $WANDB_DIR
 
 # Copy data and code to compute node
 mkdir $SLURM_TMPDIR/data
-tar cf $project/ups.tar.gz $project/ups
-tar xf $project/ups.tar.gz -C $SLURM_TMPDIR/ups
+tar cf $project/cifar10_2000/ups.tar.gz $project/cifar10_2000/ups
+tar xf $project/cifar10_2000/ups.tar.gz -C $SLURM_TMPDIR/ups
 tar xf $project/data/cifar-10-python.tar.gz -C $SLURM_TMPDIR/data
 
 cd $SLURM_TMPDIR/ups
