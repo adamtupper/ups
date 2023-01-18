@@ -55,7 +55,7 @@ def train_regular(args, lbl_loader, nl_loader, model, optimizer, scheduler, epoc
         losses.update(loss.item())
 
         optimizer.step()
-        scheduler.step()
+        scheduler.step()  # TODO: Need to step every epoch when running without restarts!
         model.zero_grad()
 
         batch_time.update(time.time() - end)
@@ -100,7 +100,7 @@ def train_initial(args, train_loader, model, optimizer, scheduler, epoch, itr):
         losses.update(loss.item())
 
         optimizer.step()
-        scheduler.step()
+        scheduler.step()  # TODO: Need to step every epoch when running without restarts!
         model.zero_grad()
         
         batch_time.update(time.time() - end)
