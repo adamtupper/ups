@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --array=1-54%1
+#SBATCH --array=1-7%1
 #SBATCH --mem=32000M
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks-per-node=8
-#SBATCH --time=3:00:00
+#SBATCH --time=24:00:00
 #SBATCH --mail-user=adam.tupper.1@ulaval.ca
 #SBATCH --mail-type=ALL
 
@@ -40,8 +40,8 @@ mkdir -p $WANDB_DIR
 
 # Copy data and code to compute node
 mkdir $SLURM_TMPDIR/data
-tar cf $project/cifar10_2000/ups.tar.gz $project/cifar10_2000/ups
-tar xf $project/cifar10_2000/ups.tar.gz -C $SLURM_TMPDIR/ups
+tar cf $project/ups.tar.gz $project/ups
+tar xf $project/ups.tar.gz -C $SLURM_TMPDIR/ups
 tar xf $project/data/cifar-10-python.tar.gz -C $SLURM_TMPDIR/data
 
 cd $SLURM_TMPDIR/ups
@@ -61,7 +61,7 @@ if test -d "$scratch/$1"; then
         --resume $scratch/$1 \
         --exp-name $1 \
         --dataset "cifar10" \
-        --n-lbl 2000 \
+        --n-lbl 4000 \
         --seed $2 \
         --split-txt "run$SLURM_ARRAY_TASK_ID" \
         --arch "wideresnet" \
@@ -73,7 +73,7 @@ fi
         --data-dir $SLURM_TMPDIR/data \
         --exp-name $1 \
         --dataset "cifar10" \
-        --n-lbl 2000 \
+        --n-lbl 4000 \
         --seed $2 \
         --split-txt "run$SLURM_ARRAY_TASK_ID" \
         --arch "wideresnet" \
