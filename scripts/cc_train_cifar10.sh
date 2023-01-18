@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --array=1-7%1
+#SBATCH --array=1-54%1
 #SBATCH --mem=32000M
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks-per-node=8
-#SBATCH --time=24:00:00
+#SBATCH --time=3:00:00
 #SBATCH --mail-user=adam.tupper.1@ulaval.ca
 #SBATCH --mail-type=ALL
 
@@ -61,7 +61,7 @@ if test -d "$scratch/$1"; then
         --resume $scratch/$1 \
         --exp-name $1 \
         --dataset "cifar10" \
-        --n-lbl 4000 \
+        --n-lbl 2000 \
         --seed $2 \
         --split-txt "run$SLURM_ARRAY_TASK_ID" \
         --arch "wideresnet" \
@@ -73,7 +73,7 @@ fi
         --data-dir $SLURM_TMPDIR/data \
         --exp-name $1 \
         --dataset "cifar10" \
-        --n-lbl 4000 \
+        --n-lbl 2000 \
         --seed $2 \
         --split-txt "run$SLURM_ARRAY_TASK_ID" \
         --arch "wideresnet" \
