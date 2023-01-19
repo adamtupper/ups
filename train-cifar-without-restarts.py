@@ -34,6 +34,7 @@ def main():
     parser.add_argument('--out', help='directory to output the result')
     parser.add_argument('--data-dir', help='directory where the datasets are stored')
     parser.add_argument('--exp-name', help='a unique ID for the experiment')
+    parser.add_argument('--no-restarts', action='store_true', help="disable model restarts between iterations")
     parser.add_argument('--gpu-id', default='0', type=int,
                         help='id(s) for CUDA_VISIBLE_DEVICES')
     parser.add_argument('--n-gpu', default=1, type=int, help='number of gpus to use')
