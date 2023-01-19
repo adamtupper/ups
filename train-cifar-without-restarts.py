@@ -218,7 +218,7 @@ def main():
                 if os.path.isfile(resume_model) and checkpoint_itr == itr:
                     checkpoint = torch.load(resume_model)
                     best_acc = checkpoint['best_acc']
-                    start_epoch = checkpoint_itr * args.epochs + checkpoint['epoch']
+                    start_epoch = checkpoint['epoch']
                     model.load_state_dict(checkpoint['state_dict'])
                     optimizer.load_state_dict(checkpoint['optimizer'])
                     scheduler.load_state_dict(checkpoint['scheduler'])
