@@ -62,7 +62,7 @@ if test -d "$scratch/$1"; then
         --exp-name $1 \
         --no-restarts \
         --dataset "cifar10" \
-        --n-lbl 4000 \
+        --n-lbl 2000 \
         --seed $2 \
         --split-txt "run$SLURM_ARRAY_TASK_ID" \
         --arch "wideresnet" \
@@ -75,7 +75,7 @@ fi
         --exp-name $1 \
         --no-restarts \
         --dataset "cifar10" \
-        --n-lbl 4000 \
+        --n-lbl 2000 \
         --seed $2 \
         --split-txt "run$SLURM_ARRAY_TASK_ID" \
         --arch "wideresnet" \
