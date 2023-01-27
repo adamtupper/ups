@@ -313,6 +313,7 @@ def main():
             ofile.write(f'PL Acc (Negative): {pl_acc_neg}, Total Selected (Negative): {total_sel_neg}, Unique Negative Samples: {unique_sel_neg}\n\n')
 
     writer.close()
+    wandb.finish()
 
 
 if __name__ == '__main__':
