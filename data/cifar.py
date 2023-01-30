@@ -30,7 +30,7 @@ def get_cifar10(root='data/datasets', n_lbl=4000, ssl_idx=None, pseudo_lbl=None,
     ])
 
     if ssl_idx is None:
-        base_dataset = datasets.CIFAR10(root, train=True, download=True)
+        base_dataset = datasets.CIFAR10(root, train=True, download=False)
         train_lbl_idx, train_unlbl_idx = lbl_unlbl_split(base_dataset.targets, n_lbl, 10)
         
         os.makedirs('data/splits', exist_ok=True)
@@ -82,7 +82,7 @@ def get_cifar10(root='data/datasets', n_lbl=4000, ssl_idx=None, pseudo_lbl=None,
     train_unlbl_dataset = CIFAR10SSL(
     root, train_unlbl_idx, train=True, transform=transform_val)
 
-    test_dataset = datasets.CIFAR10(root, train=False, transform=transform_val, download=True)
+    test_dataset = datasets.CIFAR10(root, train=False, transform=transform_val, download=False)
 
     if nl_idx is not None:
         return train_lbl_dataset, train_nl_dataset, train_unlbl_dataset, test_dataset
@@ -112,7 +112,7 @@ def get_cifar100(root='data/datasets', n_lbl=10000, ssl_idx=None, pseudo_lbl=Non
     ])
 
     if ssl_idx is None:
-        base_dataset = datasets.CIFAR100(root, train=True, download=True)
+        base_dataset = datasets.CIFAR100(root, train=True, download=False)
         train_lbl_idx, train_unlbl_idx = lbl_unlbl_split(base_dataset.targets, n_lbl, 100)
         
         f = open(os.path.join('data/splits', f'cifar100_basesplit_{n_lbl}_{split_txt}.pkl'),"wb")
@@ -163,7 +163,7 @@ def get_cifar100(root='data/datasets', n_lbl=10000, ssl_idx=None, pseudo_lbl=Non
     train_unlbl_dataset = CIFAR100SSL(
     root, train_unlbl_idx, train=True, transform=transform_val)
 
-    test_dataset = datasets.CIFAR100(root, train=False, transform=transform_val, download=True)
+    test_dataset = datasets.CIFAR100(root, train=False, transform=transform_val, download=False)
 
     if nl_idx is not None:
         return train_lbl_dataset, train_nl_dataset, train_unlbl_dataset, test_dataset
@@ -187,7 +187,7 @@ def lbl_unlbl_split(lbls, n_lbl, n_class):
 class CIFAR10SSL(datasets.CIFAR10):
     def __init__(self, root, indexs, train=True,
                  transform=None, target_transform=None,
-                 download=True, pseudo_idx=None, pseudo_target=None,
+                 download=False, pseudo_idx=None, pseudo_target=None,
                  nl_idx=None, nl_mask=None):
         super().__init__(root, train=train,
                          transform=transform,
@@ -229,7 +229,7 @@ class CIFAR10SSL(datasets.CIFAR10):
 class CIFAR100SSL(datasets.CIFAR100):
     def __init__(self, root, indexs, train=True,
                  transform=None, target_transform=None,
-                 download=True, pseudo_idx=None, pseudo_target=None,
+                 download=False, pseudo_idx=None, pseudo_target=None,
                  nl_idx=None, nl_mask=None):
         super().__init__(root, train=train,
                          transform=transform,
