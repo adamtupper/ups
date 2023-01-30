@@ -236,15 +236,19 @@ def main():
             test_model = model
             if epoch > (args.epochs+1)/2 and epoch%args.test_freq==0:
                 test_loss, test_acc = test(args, test_loader, test_model)
+                writer.add_scalar('test/1.test_acc', test_acc, (itr*args.epochs)+epoch)
+                writer.add_scalar('test/2.test_loss', test_loss, (itr*args.epochs)+epoch)
+                wandb.log({'train/1.test_acc': test_acc}, step=(itr*args.epochs)+epoch)
+                wandb.log({'train/2.test_loss': test_loss}, step=(itr*args.epochs)+epoch)
             elif epoch == (args.epochs-1):
                 test_loss, test_acc = test(args, test_loader, test_model)
-
+                writer.add_scalar('test/1.test_acc', test_acc, (itr*args.epochs)+epoch)
+                writer.add_scalar('test/2.test_loss', test_loss, (itr*args.epochs)+epoch)
+                wandb.log({'train/1.test_acc': test_acc}, step=(itr*args.epochs)+epoch)
+                wandb.log({'train/2.test_loss': test_loss}, step=(itr*args.epochs)+epoch)
+                
             writer.add_scalar('train/1.train_loss', train_loss, (itr*args.epochs)+epoch)
-            writer.add_scalar('test/1.test_acc', test_acc, (itr*args.epochs)+epoch)
-            writer.add_scalar('test/2.test_loss', test_loss, (itr*args.epochs)+epoch)
             wandb.log({'train/1.train_loss': train_loss}, step=(itr*args.epochs)+epoch)
-            wandb.log({'train/1.test_acc': test_acc}, step=(itr*args.epochs)+epoch)
-            wandb.log({'train/2.test_loss': test_loss}, step=(itr*args.epochs)+epoch)
 
             is_best = test_acc > best_acc
             best_acc = max(test_acc, best_acc)
