@@ -3,8 +3,8 @@ numpy==1.16.4+computecanada
 protobuf==3.20.1+computecanada
 scikit-learn==0.22.1+computecanada
 scipy==1.3.1+computecanada
-torch==1.6.0+computecanada
-torchvision==0.7.0+computecanada
+torch==1.12.1+computecanada
+torchvision===0.13.1+torch1121.computecanada
 tqdm==4.40.2+computecanada
 tensorboardx==1.8+computecanada
 tensorboard==1.13.1+computecanada
