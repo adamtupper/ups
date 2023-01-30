@@ -165,7 +165,7 @@ def main():
         else:
             pseudo_lbl_dict = None
         
-        lbl_dataset, nl_dataset, unlbl_dataset, test_dataset = DATASET_GETTERS[args.dataset]('data/datasets', args.n_lbl,
+        lbl_dataset, nl_dataset, unlbl_dataset, test_dataset = DATASET_GETTERS[args.dataset](args.data_dir, args.n_lbl,
                                                                 lbl_unlbl_split, pseudo_lbl_dict, itr, args.split_txt)
 
         model = create_model(args)
