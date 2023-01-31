@@ -33,7 +33,7 @@ echo ""
 module purge
 
 # Set Weights & Biases cache and output directories
-export WANDB_CACHE_DIR=$SLURM_TMPDIR/.cache/wandb
+export WANDB_CACHE_DIR=$scratch/.cache/wandb
 export WANDB_DIR=$scratch/wandb
 mkdir -p $WANDB_CACHE_DIR
 mkdir -p $WANDB_DIR
