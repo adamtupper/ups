@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --array=1-14%1
+#SBATCH --array=1-20%1
 #SBATCH --mem=32000M
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks-per-node=8
-#SBATCH --time=3:00:00
+#SBATCH --time=12:00:00
 #SBATCH --mail-user=adam.tupper.1@ulaval.ca
 #SBATCH --mail-type=ALL
 

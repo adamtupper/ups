@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --array=1-16%1
+#SBATCH --array=1-20%1
 #SBATCH --mem=32000M
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
