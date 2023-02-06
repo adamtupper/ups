@@ -8,4 +8,3 @@ torchvision===0.13.1+torch1121.computecanada
 tqdm==4.40.2+computecanada
 tensorboardx==1.8+computecanada
 tensorboard==1.13.1+computecanada
-wandb==0.12.5+computecanada

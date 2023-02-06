@@ -25,7 +25,6 @@ from utils.utils import *
 from utils.train_util import train_initial, train_regular
 from utils.evaluate import test
 from utils.pseudo_labeling_util import pseudo_labeling
-import wandb
 
 
 def main():
@@ -132,12 +131,6 @@ def main():
             start_itr = max(resume_itrs)
         args.out = args.resume
         
-        # Resume W&B tracking
-        wandb.init(id=args.exp_name, config=args, project="ups-replication", resume="allow")
-    else:
-        # Initialize W&B and save args as config
-        wandb.init(id=args.exp_name, config=args, project="ups-replication")
-        
     os.makedirs(args.out, exist_ok=True)
     writer = SummaryWriter(args.out)
 
@@ -239,17 +232,12 @@ def main():
                 test_loss, test_acc = test(args, test_loader, test_model)
                 writer.add_scalar('test/1.test_acc', test_acc, (itr*args.epochs)+epoch)
                 writer.add_scalar('test/2.test_loss', test_loss, (itr*args.epochs)+epoch)
-                wandb.log({'train/1.test_acc': test_acc}, step=(itr*args.epochs)+epoch)
-                wandb.log({'train/2.test_loss': test_loss}, step=(itr*args.epochs)+epoch)
             elif epoch == (args.epochs-1):
                 test_loss, test_acc = test(args, test_loader, test_model)
                 writer.add_scalar('test/1.test_acc', test_acc, (itr*args.epochs)+epoch)
                 writer.add_scalar('test/2.test_loss', test_loss, (itr*args.epochs)+epoch)
-                wandb.log({'train/1.test_acc': test_acc}, step=(itr*args.epochs)+epoch)
-                wandb.log({'train/2.test_loss': test_loss}, step=(itr*args.epochs)+epoch)
                 
             writer.add_scalar('train/1.train_loss', train_loss, (itr*args.epochs)+epoch)
-            wandb.log({'train/1.train_loss': train_loss}, step=(itr*args.epochs)+epoch)
 
             is_best = test_acc > best_acc
             best_acc = max(test_acc, best_acc)
@@ -262,18 +250,6 @@ def main():
                 'optimizer': optimizer.state_dict(),
                 'scheduler': scheduler.state_dict(),
             }, is_best, args.out, f'iteration_{str(itr)}')
-            
-            if (epoch == args.epochs - 1) or (epoch % 10 == 0):
-                # Save checkpoint to W&B
-                metadata = {'train/1.test_acc': test_acc, 'train/iteration': itr, 'train/epoch': epoch + 1}
-                artifact = wandb.Artifact(
-                    name=f'model-{wandb.run.id}',
-                    metadata=metadata, 
-                    type='model'
-                    )
-                artifact.add_file(os.path.join(args.out, f"checkpoint_iteration_{itr}.pth.tar"))
-                aliases = ['best'] if is_best else []
-                wandb.log_artifact(artifact, aliases=aliases)
     
         checkpoint = torch.load(f'{args.out}/checkpoint_iteration_{str(itr)}.pth.tar')
         model.load_state_dict(checkpoint['state_dict'])
@@ -289,26 +265,9 @@ def main():
         writer.add_scalar('pseudo_labeling/5.pseudo_acc_negative', pl_acc_neg, itr)
         writer.add_scalar('pseudo_labeling/6.total_sel_negative', total_sel_neg, itr)
         writer.add_scalar('pseudo_labeling/7.unique_samples_negative', unique_sel_neg, itr)
-        wandb.log({'pseudo_labeling/1.regular_loss': pl_loss}, step=(itr*args.epochs)+epoch)
-        wandb.log({'pseudo_labeling/2.regular_acc': pl_acc}, step=(itr*args.epochs)+epoch)
-        wandb.log({'pseudo_labeling/3.pseudo_acc_positive': pl_acc_pos}, step=(itr*args.epochs)+epoch)
-        wandb.log({'pseudo_labeling/4.total_sel_positive': total_sel_pos}, step=(itr*args.epochs)+epoch)
-        wandb.log({'pseudo_labeling/5.pseudo_acc_negative': pl_acc_neg}, step=(itr*args.epochs)+epoch)
-        wandb.log({'pseudo_labeling/6.total_sel_negative': total_sel_neg}, step=(itr*args.epochs)+epoch)
-        wandb.log({'pseudo_labeling/7.unique_samples_negative': unique_sel_neg}, step=(itr*args.epochs)+epoch)
 
         with open(os.path.join(args.out, f'pseudo_labeling_iteration_{str(itr+1)}.pkl'),"wb") as f:
             pickle.dump(pseudo_label_dict,f)
-        
-        # Save pseudo-labels to W&B
-        metadata = {'train/1.test_acc': test_acc, 'train/iteration': itr + 1}
-        artifact = wandb.Artifact(
-            name=f'pseudo_label_dict-{wandb.run.id}',
-            metadata=metadata, 
-            type='labels'
-            )
-        artifact.add_file(os.path.join(args.out, f'pseudo_labeling_iteration_{str(itr+1)}.pkl'))
-        wandb.log_artifact(artifact)
         
         with open(os.path.join(args.out, 'log.txt'), 'a+') as ofile:
             ofile.write(f'############################# PL Iteration: {itr+1} #############################\n')
@@ -317,7 +276,6 @@ def main():
             ofile.write(f'PL Acc (Negative): {pl_acc_neg}, Total Selected (Negative): {total_sel_neg}, Unique Negative Samples: {unique_sel_neg}\n\n')
 
     writer.close()
-    wandb.finish()
 
 
 if __name__ == '__main__':

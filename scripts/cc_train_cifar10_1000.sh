@@ -8,10 +8,10 @@
 #SBATCH --mail-user=adam.tupper.1@ulaval.ca
 #SBATCH --mail-type=ALL
 
-# Check for experiment name
+# Check for experiment ID
 if [ -z "$1" ]
   then
-    echo "No experiment name supplied"
+    echo "No experiment ID supplied"
     exit 1
 fi
 
@@ -22,35 +22,16 @@ if [ -z "$2" ]
     exit 1
 fi
 
-# Check for W&B sync mode
-if [ -z "$3" ]
-  then
-    echo "W&B offline (true/false) not supplied"
-    exit 1
-fi
-
 # Print Job info
 echo "Current working directory: `pwd`"
 echo "Starting run at: `date`"
-echo "W&B offline: $3"
+echo "Experiment ID: $1"
 echo ""
 echo "Job Array ID / Job ID: $SLURM_ARRAY_JOB_ID / $SLURM_JOB_ID"
 echo "This is job $SLURM_ARRAY_TASK_ID out of $SLURM_ARRAY_TASK_COUNT jobs."
 echo ""
 
 module purge
-
-# Set Weights & Biases cache and output directories
-export WANDB_CACHE_DIR=$scratch/.cache/wandb
-export WANDB_DIR=$scratch/wandb
-mkdir -p $WANDB_CACHE_DIR
-mkdir -p $WANDB_DIR
-
-if [ "$3" = "true" ]; then
-    export WANDB_MODE="offline"
-else
-    export WANDB_MODE="online"
-fi
 
 # Copy data and code to compute node
 mkdir $SLURM_TMPDIR/data
