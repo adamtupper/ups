@@ -59,7 +59,7 @@ if test -d "$scratch/$1"; then
         --dataset "cifar10" \
         --n-lbl 4000 \
         --seed $2 \
-        --split-txt "run$SLURM_ARRAY_TASK_ID" \
+        --split-txt $1 \
         --arch "wideresnet" \
         --no-progress
 fi
@@ -72,6 +72,6 @@ fi
         --dataset "cifar10" \
         --n-lbl 4000 \
         --seed $2 \
-        --split-txt "run$SLURM_ARRAY_TASK_ID" \
+        --split-txt $1 \
         --arch "wideresnet" \
         --no-progress
