@@ -139,6 +139,7 @@ def main():
     elif args.dataset == 'cifar100':
         args.num_classes = 100
     
+    print(f"Resuming run from iteration {start_itr}...")
     for itr in range(start_itr, args.iterations):
         if itr == 0 and args.n_lbl < 4000: #use a smaller batchsize to increase the number of iterations
             args.batch_size = 64
@@ -147,8 +148,8 @@ def main():
             args.batch_size = args.batchsize
             args.epochs = args.epchs
 
-        if os.path.exists(f'data/splits/{args.dataset}_basesplit_{args.n_lbl}_{args.split_txt}.pkl'):
-            lbl_unlbl_split = f'data/splits/{args.dataset}_basesplit_{args.n_lbl}_{args.split_txt}.pkl'
+        if os.path.exists(f'{args.out}/data/splits/{args.dataset}_basesplit_{args.n_lbl}_{args.split_txt}.pkl'):
+            lbl_unlbl_split = f'{args.out}/data/splits/{args.dataset}_basesplit_{args.n_lbl}_{args.split_txt}.pkl'
         else:
             lbl_unlbl_split = None
         
@@ -158,7 +159,7 @@ def main():
         else:
             pseudo_lbl_dict = None
         
-        lbl_dataset, nl_dataset, unlbl_dataset, test_dataset = DATASET_GETTERS[args.dataset](args.data_dir, args.n_lbl,
+        lbl_dataset, nl_dataset, unlbl_dataset, test_dataset = DATASET_GETTERS[args.dataset](args.out, args.data_dir, args.n_lbl,
                                                                 lbl_unlbl_split, pseudo_lbl_dict, itr, args.split_txt)
 
         model = create_model(args)
@@ -276,6 +277,9 @@ def main():
             ofile.write(f'PL Acc (Negative): {pl_acc_neg}, Total Selected (Negative): {total_sel_neg}, Unique Negative Samples: {unique_sel_neg}\n\n')
 
     writer.close()
+    
+    with open(os.path.join(args.out, 'log.txt'), 'a+') as ofile:
+            ofile.write(f'Exited after completing all {args.iterations} iterations.\n')
 
 
 if __name__ == '__main__':

@@ -7,7 +7,7 @@ import pickle
 import os
 
 
-def get_cifar10(root='data/datasets', n_lbl=4000, ssl_idx=None, pseudo_lbl=None, itr=0, split_txt=''):
+def get_cifar10(splits_dir=".", root='data/datasets', n_lbl=4000, ssl_idx=None, pseudo_lbl=None, itr=0, split_txt=''):
     os.makedirs(root, exist_ok=True) #create the root directory for saving data
     # augmentations
     transform_train = transforms.Compose([
@@ -33,8 +33,8 @@ def get_cifar10(root='data/datasets', n_lbl=4000, ssl_idx=None, pseudo_lbl=None,
         base_dataset = datasets.CIFAR10(root, train=True, download=False)
         train_lbl_idx, train_unlbl_idx = lbl_unlbl_split(base_dataset.targets, n_lbl, 10)
         
-        os.makedirs('data/splits', exist_ok=True)
-        f = open(os.path.join('data/splits', f'cifar10_basesplit_{n_lbl}_{split_txt}.pkl'),"wb")
+        os.makedirs(f'{splits_dir}/data/splits', exist_ok=True)
+        f = open(os.path.join(f'{splits_dir}/data/splits', f'cifar10_basesplit_{n_lbl}_{split_txt}.pkl'),"wb")
         lbl_unlbl_dict = {'lbl_idx': train_lbl_idx, 'unlbl_idx': train_unlbl_idx}
         pickle.dump(lbl_unlbl_dict,f)
     
@@ -90,7 +90,7 @@ def get_cifar10(root='data/datasets', n_lbl=4000, ssl_idx=None, pseudo_lbl=None,
         return train_lbl_dataset, train_unlbl_dataset, train_unlbl_dataset, test_dataset
 
 
-def get_cifar100(root='data/datasets', n_lbl=10000, ssl_idx=None, pseudo_lbl=None, itr=0, split_txt=''):
+def get_cifar100(splits_dir=".", root='data/datasets', n_lbl=10000, ssl_idx=None, pseudo_lbl=None, itr=0, split_txt=''):
     ## augmentations
     transform_train = transforms.Compose([
         RandAugment(3,4),  #from https://arxiv.org/pdf/1909.13719.pdf. For CIFAR-10 M=3, N=4
@@ -115,7 +115,8 @@ def get_cifar100(root='data/datasets', n_lbl=10000, ssl_idx=None, pseudo_lbl=Non
         base_dataset = datasets.CIFAR100(root, train=True, download=False)
         train_lbl_idx, train_unlbl_idx = lbl_unlbl_split(base_dataset.targets, n_lbl, 100)
         
-        f = open(os.path.join('data/splits', f'cifar100_basesplit_{n_lbl}_{split_txt}.pkl'),"wb")
+        os.makedirs(f'{splits_dir}/data/splits', exist_ok=True)
+        f = open(os.path.join(f'{splits_dir}/data/splits', f'cifar100_basesplit_{n_lbl}_{split_txt}.pkl'),"wb")
         lbl_unlbl_dict = {'lbl_idx': train_lbl_idx, 'unlbl_idx': train_unlbl_idx}
         pickle.dump(lbl_unlbl_dict,f)
     
