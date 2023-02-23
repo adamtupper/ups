@@ -83,7 +83,7 @@ def main():
 
         # Compile output files into compressed tarball
         tar_file = f"{dataset}_{num_labels}_{seed}_{arch}_iters{iters}_epochs{epochs}_exp{experiment}_job{id}.tar.gz"
-        with tarfile.open(tar_file, "w:gz") as tar:
+        with tarfile.open(os.path.join(args.artifacts_dir, tar_file), "w:gz") as tar:
             tar.add(experiment_dir, arcname=os.path.basename(experiment_dir))
 
         # Clean-up
