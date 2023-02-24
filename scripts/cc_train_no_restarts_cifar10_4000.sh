@@ -51,7 +51,7 @@ if test -d "$scratch/UPS_$SLURM_ARRAY_JOB_ID"; then
         --no-restarts \
         --dataset "cifar10" \
         --n-lbl 4000 \
-        --seed $2 \
+        --seed $1 \
         --split-txt "UPS_$SLURM_ARRAY_JOB_ID" \
         --arch "wideresnet" \
         --no-progress
@@ -64,7 +64,7 @@ else
         --no-restarts \
         --dataset "cifar10" \
         --n-lbl 4000 \
-        --seed $2 \
+        --seed $1 \
         --split-txt "UPS_$SLURM_ARRAY_JOB_ID" \
         --arch "wideresnet" \
         --no-progress
