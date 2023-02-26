@@ -9,16 +9,22 @@
 #SBATCH --mail-type=ALL
 
 # Check for random seed
-if [ -z "$1" ]
-  then
+if [ -z "$1" ]; then
     echo "No seed supplied"
     exit 1
+fi
+
+# Check for (optional) experiment ID for resuming a previous training job
+if [ -z "$1" ]; then
+    $exp_id = $1
+else
+    $exp_id = "UPS_$SLURM_ARRAY_JOB_ID"
 fi
 
 # Print Job info
 echo "Current working directory: `pwd`"
 echo "Starting run at: `date`"
-echo "Experiment ID: UPS_$SLURM_ARRAY_JOB_ID"
+echo "Experiment ID: $exp_id"
 echo ""
 echo "Job Array ID / Job ID: $SLURM_ARRAY_JOB_ID / $SLURM_JOB_ID"
 echo "This is job $SLURM_ARRAY_TASK_ID out of $SLURM_ARRAY_TASK_COUNT jobs."
@@ -41,18 +47,18 @@ source $SLURM_TMPDIR/env/bin/activate
 pip install --no-index --upgrade pip
 pip install --no-index -r cc_requirements.txt
 
-if test -d "$scratch/UPS_$SLURM_ARRAY_JOB_ID"; then
+if test -d "$scratch/$exp_id"; then
     # Resume training run
     python train-cifar-without-restarts.py \
         --out $scratch \
         --data-dir $SLURM_TMPDIR/data \
-        --resume "$scratch/UPS_$SLURM_ARRAY_JOB_ID" \
-        --exp-name "UPS_$SLURM_ARRAY_JOB_ID" \
+        --resume "$scratch/$exp_id" \
+        --exp-name $exp_id \
         --no-restarts \
         --dataset "cifar10" \
         --n-lbl 4000 \
         --seed $2 \
-        --split-txt "UPS_$SLURM_ARRAY_JOB_ID" \
+        --split-txt $exp_id \
         --arch "wideresnet" \
         --no-progress
 else
@@ -60,12 +66,12 @@ else
     python train-cifar-without-restarts.py \
         --out $scratch \
         --data-dir $SLURM_TMPDIR/data \
-        --exp-name "UPS_$SLURM_ARRAY_JOB_ID" \
+        --exp-name $exp_id \
         --no-restarts \
         --dataset "cifar10" \
         --n-lbl 4000 \
         --seed $2 \
-        --split-txt "UPS_$SLURM_ARRAY_JOB_ID" \
+        --split-txt $exp_id \
         --arch "wideresnet" \
         --no-progress
 fi
