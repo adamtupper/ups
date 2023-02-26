@@ -15,8 +15,8 @@ if [ -z "$1" ]; then
 fi
 
 # Check for (optional) experiment ID for resuming a previous training job
-if [ -z "$1" ]; then
-    $exp_id = $1
+if [ -z "$2" ]; then
+    $exp_id = $2
 else
     $exp_id = "UPS_$SLURM_ARRAY_JOB_ID"
 fi
@@ -57,7 +57,7 @@ if test -d "$scratch/$exp_id"; then
         --no-restarts \
         --dataset "cifar10" \
         --n-lbl 4000 \
-        --seed $2 \
+        --seed $1 \
         --split-txt $exp_id \
         --arch "wideresnet" \
         --no-progress
@@ -70,7 +70,7 @@ else
         --no-restarts \
         --dataset "cifar10" \
         --n-lbl 4000 \
-        --seed $2 \
+        --seed $1 \
         --split-txt $exp_id \
         --arch "wideresnet" \
         --no-progress
