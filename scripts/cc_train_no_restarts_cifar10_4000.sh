@@ -16,9 +16,9 @@ fi
 
 # Check for (optional) experiment ID for resuming a previous training job
 if [ -z "$2" ]; then
-    $exp_id = $2
+    exp_id=$2
 else
-    $exp_id = "UPS_$SLURM_ARRAY_JOB_ID"
+    exp_id="UPS_$SLURM_ARRAY_JOB_ID"
 fi
 
 # Print Job info
