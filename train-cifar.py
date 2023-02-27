@@ -34,6 +34,8 @@ def main():
     parser.add_argument('--data-dir', help='directory where the datasets are stored')
     parser.add_argument('--exp-name', help='a unique ID for the experiment')
     parser.add_argument('--no-restarts', action='store_true', help="disable model restarts between iterations")
+    parser.add_argument('--use-zca', action='store_true',
+                        help="apply ZCA normalization to the data (if training on CIFAR-10)")
     parser.add_argument('--gpu-id', default='0', type=int,
                         help='id(s) for CUDA_VISIBLE_DEVICES')
     parser.add_argument('--n-gpu', default=1, type=int, help='number of gpus to use')
@@ -101,6 +103,7 @@ def main():
     print('########################################################################')
     print('########################################################################')
     print(f'dataset:                                  {args.dataset}')
+    print(f'use ZCA?:                                 {args.use_zca}')
     print(f'train/val split:                          45K/5K')
     print(f'number of labeled samples:                {args.n_lbl}')
     print(f'architecture:                             {args.arch}')
@@ -137,6 +140,12 @@ def main():
 
     if args.dataset == 'cifar10':
         args.num_classes = 10
+        
+        # Load ZCA for CIFAR-10
+        zca_components = np.load('zca_components.npy')
+        zca_mean = np.load('zca_mean.npy')
+        args.zca_components = zca_components
+        args.zca_mean = zca_mean
     elif args.dataset == 'cifar100':
         args.num_classes = 100
     

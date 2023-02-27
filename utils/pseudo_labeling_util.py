@@ -5,7 +5,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from tqdm import tqdm
-from .misc import AverageMeter, accuracy
+from .misc import AverageMeter, accuracy, apply_zca
 from .utils import enable_dropout
 
 
@@ -37,6 +37,11 @@ def pseudo_labeling(args, data_loader, model, itr):
     with torch.no_grad():
         for batch_idx, (inputs, targets, indexs, _) in enumerate(data_loader):
             data_time.update(time.time() - end)
+            
+            if args.dataset == 'cifar10':
+                if args.use_zca:
+                    inputs = apply_zca(inputs, args.zca_mean, args.zca_components)
+            
             inputs = inputs.to(args.device)
             targets = targets.to(args.device)
             out_prob = []
