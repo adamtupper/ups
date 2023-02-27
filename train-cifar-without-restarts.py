@@ -101,6 +101,7 @@ def main():
     print('########################################################################')
     print('########################################################################')
     print(f'dataset:                                  {args.dataset}')
+    print(f'train/val split:                          45K/5K')
     print(f'number of labeled samples:                {args.n_lbl}')
     print(f'architecture:                             {args.arch}')
     print(f'number of pseudo-labeling iterations:     {args.iterations}')
@@ -165,7 +166,7 @@ def main():
         else:
             pseudo_lbl_dict = None
         
-        lbl_dataset, nl_dataset, unlbl_dataset, test_dataset = DATASET_GETTERS[args.dataset](args.out, args.data_dir, args.n_lbl,
+        lbl_dataset, nl_dataset, unlbl_dataset, val_dataset, test_dataset = DATASET_GETTERS[args.dataset](args.out, args.data_dir, args.n_lbl,
                                                                 lbl_unlbl_split, pseudo_lbl_dict, itr, args.split_txt)
 
         nl_batchsize = int((float(args.batch_size) * len(nl_dataset))/(len(lbl_dataset) + len(nl_dataset)))
@@ -190,6 +191,12 @@ def main():
             batch_size=nl_batchsize,
             num_workers=args.num_workers,
             drop_last=True)
+
+        val_loader = DataLoader(
+            val_dataset,
+            sampler=SequentialSampler(val_dataset),
+            batch_size=args.batch_size,
+            num_workers=args.num_workers)
 
         test_loader = DataLoader(
             test_dataset,
@@ -225,27 +232,27 @@ def main():
             else:
                 train_loss = train_regular(args, lbl_loader, nl_loader, model, optimizer, scheduler, epoch, itr)
 
-            test_loss = 0.0
-            test_acc = 0.0
-            test_model = model
+            val_loss = 0.0
+            val_acc = 0.0
+            val_model = model
             if epoch > (args.epochs+1)/2 and epoch%args.test_freq==0:
-                test_loss, test_acc = test(args, test_loader, test_model)
-                writer.add_scalar('test/1.test_acc', test_acc, (itr*args.epochs)+epoch)
-                writer.add_scalar('test/2.test_loss', test_loss, (itr*args.epochs)+epoch)
+                val_loss, val_acc = test(args, val_loader, val_model)
+                writer.add_scalar('val/1.val_acc', val_acc, (itr*args.epochs)+epoch)
+                writer.add_scalar('val/2.val_loss', val_loss, (itr*args.epochs)+epoch)
             elif epoch == (args.epochs-1):
-                test_loss, test_acc = test(args, test_loader, test_model)
-                writer.add_scalar('test/1.test_acc', test_acc, (itr*args.epochs)+epoch)
-                writer.add_scalar('test/2.test_loss', test_loss, (itr*args.epochs)+epoch)
+                val_loss, val_acc = test(args, val_loader, val_model)
+                writer.add_scalar('val/1.val_acc', val_acc, (itr*args.epochs)+epoch)
+                writer.add_scalar('val/2.val_loss', val_loss, (itr*args.epochs)+epoch)
                 
             writer.add_scalar('train/1.train_loss', train_loss, (itr*args.epochs)+epoch)
 
-            is_best = test_acc > best_acc
-            best_acc = max(test_acc, best_acc)
+            is_best = val_acc > best_acc
+            best_acc = max(val_acc, best_acc)
             model_to_save = model.module if hasattr(model, "module") else model
             save_checkpoint({
                 'epoch': epoch + 1,
                 'state_dict': model_to_save.state_dict(),
-                'acc': test_acc,
+                'acc': val_acc,
                 'best_acc': best_acc,
                 'optimizer': optimizer.state_dict(),
                 'scheduler': scheduler.state_dict(),
@@ -271,9 +278,20 @@ def main():
         
         with open(os.path.join(args.out, 'log.txt'), 'a+') as ofile:
             ofile.write(f'############################# PL Iteration: {itr+1} #############################\n')
-            ofile.write(f'Last Test Acc: {test_acc}, Best Test Acc: {best_acc}\n')
+            ofile.write(f'Last Test Acc: {val_acc}, Best Test Acc: {best_acc}\n')
             ofile.write(f'PL Acc (Positive): {pl_acc_pos}, Total Selected (Positive): {total_sel_pos}\n')
             ofile.write(f'PL Acc (Negative): {pl_acc_neg}, Total Selected (Negative): {total_sel_neg}, Unique Negative Samples: {unique_sel_neg}\n\n')
+            
+        if (itr == args.iterations - 1) and (epoch == (args.epochs-1)):
+            # Evaluate best checkpoint from final iteration
+            checkpoint = torch.load(f'{args.out}/model_best_iteration_{args.iterations - 1}.pth.tar')
+            model.load_state_dict(checkpoint['state_dict'])
+            test_loss, test_acc = test(args, test_loader, model)
+            writer.add_scalar('test/1.test_acc', test_acc, (itr*args.epochs)+epoch)
+            writer.add_scalar('test/2.test_loss', test_loss, (itr*args.epochs)+epoch)
+            
+            with open(os.path.join(args.out, 'log.txt'), 'a+') as ofile:
+                ofile.write(f'Test Acc (best checkpoint): {test_acc}\n')
 
     writer.close()
     

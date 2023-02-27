@@ -20,7 +20,8 @@ def test(args, test_loader, model):
         test_loader = tqdm(test_loader)
 
     with torch.no_grad():
-        for batch_idx, (inputs, targets) in enumerate(test_loader):
+        for batch_idx, batch in enumerate(test_loader):
+            inputs, targets = batch[:2]
             data_time.update(time.time() - end)
             model.eval()
 
@@ -36,7 +37,7 @@ def test(args, test_loader, model):
             batch_time.update(time.time() - end)
             end = time.time()
             if not args.no_progress:
-                test_loader.set_description("Test Iter: {batch:4}/{iter:4}. Data: {data:.3f}s. Batch: {bt:.3f}s. Loss: {loss:.4f}. top1: {top1:.2f}. top5: {top5:.2f}. ".format(
+                test_loader.set_description("Test/Val Iter: {batch:4}/{iter:4}. Data: {data:.3f}s. Batch: {bt:.3f}s. Loss: {loss:.4f}. top1: {top1:.2f}. top5: {top5:.2f}. ".format(
                     batch=batch_idx + 1,
                     iter=len(test_loader),
                     data=data_time.avg,

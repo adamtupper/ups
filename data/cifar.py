@@ -1,5 +1,7 @@
 import numpy as np
+import torch
 from PIL import Image
+from torch.utils.data import random_split
 from torchvision import datasets
 from torchvision import transforms
 from .augmentations import RandAugment, CutoutRandom
@@ -30,7 +32,10 @@ def get_cifar10(splits_dir=".", root='data/datasets', n_lbl=4000, ssl_idx=None, 
     ])
 
     if ssl_idx is None:
-        base_dataset = datasets.CIFAR10(root, train=True, download=False)
+        train_idx = np.random.default_rng(seed=None).integers(50000, size=45000)
+        val_idx = np.setdiff1d(np.arange(50000), train_idx)
+        
+        base_dataset = CIFAR10SSL(root, indexs=train_idx, train=True, download=False)
         train_lbl_idx, train_unlbl_idx = lbl_unlbl_split(base_dataset.targets, n_lbl, 10)
         
         os.makedirs(f'{splits_dir}/data/splits', exist_ok=True)
@@ -42,6 +47,7 @@ def get_cifar10(splits_dir=".", root='data/datasets', n_lbl=4000, ssl_idx=None, 
         lbl_unlbl_dict = pickle.load(open(ssl_idx, 'rb'))
         train_lbl_idx = lbl_unlbl_dict['lbl_idx']
         train_unlbl_idx = lbl_unlbl_dict['unlbl_idx']
+        val_idx = np.setdiff1d(np.arange(50000), np.concatenate((train_lbl_idx, train_unlbl_idx)))
 
     lbl_idx = train_lbl_idx
     if pseudo_lbl is not None:
@@ -82,12 +88,13 @@ def get_cifar10(splits_dir=".", root='data/datasets', n_lbl=4000, ssl_idx=None, 
     train_unlbl_dataset = CIFAR10SSL(
     root, train_unlbl_idx, train=True, transform=transform_val)
 
+    val_dataset = CIFAR10SSL(root, indexs=val_idx, train=True, transform=transform_val)
     test_dataset = datasets.CIFAR10(root, train=False, transform=transform_val, download=False)
 
     if nl_idx is not None:
-        return train_lbl_dataset, train_nl_dataset, train_unlbl_dataset, test_dataset
+        return train_lbl_dataset, train_nl_dataset, train_unlbl_dataset, val_dataset, test_dataset
     else:
-        return train_lbl_dataset, train_unlbl_dataset, train_unlbl_dataset, test_dataset
+        return train_lbl_dataset, train_unlbl_dataset, train_unlbl_dataset, val_dataset, test_dataset
 
 
 def get_cifar100(splits_dir=".", root='data/datasets', n_lbl=10000, ssl_idx=None, pseudo_lbl=None, itr=0, split_txt=''):
@@ -112,7 +119,10 @@ def get_cifar100(splits_dir=".", root='data/datasets', n_lbl=10000, ssl_idx=None
     ])
 
     if ssl_idx is None:
-        base_dataset = datasets.CIFAR100(root, train=True, download=False)
+        train_idx = np.random.default_rng(seed=None).integers(50000, size=45000)
+        val_idx = np.setdiff1d(np.arange(50000), train_idx)
+        
+        base_dataset = CIFAR10SSL(root, indexs=train_idx, train=True, download=False)
         train_lbl_idx, train_unlbl_idx = lbl_unlbl_split(base_dataset.targets, n_lbl, 100)
         
         os.makedirs(f'{splits_dir}/data/splits', exist_ok=True)
@@ -124,6 +134,7 @@ def get_cifar100(splits_dir=".", root='data/datasets', n_lbl=10000, ssl_idx=None
         lbl_unlbl_dict = pickle.load(open(ssl_idx, 'rb'))
         train_lbl_idx = lbl_unlbl_dict['lbl_idx']
         train_unlbl_idx = lbl_unlbl_dict['unlbl_idx']
+        val_idx = np.setdiff1d(np.arange(50000), np.concatenate((train_lbl_idx, train_unlbl_idx)))
 
     lbl_idx = train_lbl_idx
     if pseudo_lbl is not None:
@@ -164,12 +175,13 @@ def get_cifar100(splits_dir=".", root='data/datasets', n_lbl=10000, ssl_idx=None
     train_unlbl_dataset = CIFAR100SSL(
     root, train_unlbl_idx, train=True, transform=transform_val)
 
+    val_dataset = CIFAR10SSL(root, indexs=val_idx, train=True, transform=transform_val)
     test_dataset = datasets.CIFAR100(root, train=False, transform=transform_val, download=False)
 
     if nl_idx is not None:
-        return train_lbl_dataset, train_nl_dataset, train_unlbl_dataset, test_dataset
+        return train_lbl_dataset, train_nl_dataset, train_unlbl_dataset, val_dataset, test_dataset
     else:
-        return train_lbl_dataset, train_unlbl_dataset, train_unlbl_dataset, test_dataset
+        return train_lbl_dataset, train_unlbl_dataset, train_unlbl_dataset, val_dataset, test_dataset
 
 
 def lbl_unlbl_split(lbls, n_lbl, n_class):
