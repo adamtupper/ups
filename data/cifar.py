@@ -9,7 +9,7 @@ import pickle
 import os
 
 
-def get_cifar10(splits_dir=".", root='data/datasets', n_lbl=4000, ssl_idx=None, pseudo_lbl=None, itr=0, split_txt=''):
+def get_cifar10(splits_dir=".", root='data/datasets', n_lbl=4000, ssl_idx=None, pseudo_lbl=None, itr=0, split_txt='', seed=None):
     os.makedirs(root, exist_ok=True) #create the root directory for saving data
     # augmentations
     transform_train = transforms.Compose([
@@ -32,7 +32,7 @@ def get_cifar10(splits_dir=".", root='data/datasets', n_lbl=4000, ssl_idx=None, 
     ])
 
     if ssl_idx is None:
-        train_idx = np.random.default_rng(seed=None).integers(50000, size=45000)
+        train_idx = np.random.default_rng(seed=seed).integers(50000, size=45000)
         val_idx = np.setdiff1d(np.arange(50000), train_idx)
         
         base_dataset = CIFAR10SSL(root, indexs=train_idx, train=True, download=False)
@@ -97,7 +97,7 @@ def get_cifar10(splits_dir=".", root='data/datasets', n_lbl=4000, ssl_idx=None, 
         return train_lbl_dataset, train_unlbl_dataset, train_unlbl_dataset, val_dataset, test_dataset
 
 
-def get_cifar100(splits_dir=".", root='data/datasets', n_lbl=10000, ssl_idx=None, pseudo_lbl=None, itr=0, split_txt=''):
+def get_cifar100(splits_dir=".", root='data/datasets', n_lbl=10000, ssl_idx=None, pseudo_lbl=None, itr=0, split_txt='', seed=None):
     ## augmentations
     transform_train = transforms.Compose([
         RandAugment(3,4),  #from https://arxiv.org/pdf/1909.13719.pdf. For CIFAR-10 M=3, N=4
@@ -119,7 +119,7 @@ def get_cifar100(splits_dir=".", root='data/datasets', n_lbl=10000, ssl_idx=None
     ])
 
     if ssl_idx is None:
-        train_idx = np.random.default_rng(seed=None).integers(50000, size=45000)
+        train_idx = np.random.default_rng(seed=seed).integers(50000, size=45000)
         val_idx = np.setdiff1d(np.arange(50000), train_idx)
         
         base_dataset = CIFAR10SSL(root, indexs=train_idx, train=True, download=False)

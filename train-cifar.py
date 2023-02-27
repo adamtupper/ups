@@ -104,6 +104,7 @@ def main():
     print('########################################################################')
     print(f'dataset:                                  {args.dataset}')
     print(f'use ZCA?:                                 {args.use_zca}')
+    print(f'seed:                                     {args.seed}')
     print(f'train/val split:                          45K/5K')
     print(f'number of labeled samples:                {args.n_lbl}')
     print(f'architecture:                             {args.arch}')
@@ -170,7 +171,7 @@ def main():
             pseudo_lbl_dict = None
         
         lbl_dataset, nl_dataset, unlbl_dataset, val_dataset, test_dataset = DATASET_GETTERS[args.dataset](args.out, args.data_dir, args.n_lbl,
-                                                                lbl_unlbl_split, pseudo_lbl_dict, itr, args.split_txt)
+                                                                lbl_unlbl_split, pseudo_lbl_dict, itr, args.split_txt, args.seed)
 
         model = create_model(args)
         model.to(args.device)
