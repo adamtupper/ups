@@ -49,9 +49,9 @@ def main():
     parser.add_argument('--arch', default='cnn13', type=str,
                         choices=['wideresnet', 'cnn13', 'shakeshake'],
                         help='architecture name')
-    parser.add_argument('--iterations', default=24, type=int,
+    parser.add_argument('--iterations', default=20, type=int,
                         help='number of total pseudo-labeling iterations to run')
-    parser.add_argument('--epchs', default=50, type=int,
+    parser.add_argument('--epchs', default=60, type=int,
                         help='number of total epochs to run')
     parser.add_argument('--start-epoch', default=0, type=int,
                         help='manual epoch number (useful on restarts)')
