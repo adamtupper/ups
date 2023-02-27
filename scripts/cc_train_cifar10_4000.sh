@@ -54,7 +54,11 @@ if test -d "$scratch/$exp_id"; then
         --data-dir $SLURM_TMPDIR/data \
         --resume "$scratch/$exp_id" \
         --exp-name $exp_id \
+        --epchs 1200 \
+        --iterations 20 \
+        --class-blnc 10 \
         --dataset "cifar10" \
+        --use_zca \
         --n-lbl 4000 \
         --seed $1 \
         --split-txt $exp_id \
@@ -66,7 +70,11 @@ else
         --out $scratch \
         --data-dir $SLURM_TMPDIR/data \
         --exp-name $exp_id \
+        --epchs 1200 \
+        --iterations 20 \
+        --class-blnc 10 \
         --dataset "cifar10" \
+        --use_zca \
         --n-lbl 4000 \
         --seed $1 \
         --split-txt $exp_id \
