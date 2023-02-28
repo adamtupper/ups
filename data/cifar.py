@@ -10,20 +10,30 @@ import os
 
 
 def get_cifar10(splits_dir=".", root='data/datasets', n_lbl=4000, ssl_idx=None, pseudo_lbl=None, itr=0, split_txt='', seed=None):
-    os.makedirs(root, exist_ok=True) #create the root directory for saving data
-    # augmentations
+    os.makedirs(root, exist_ok=True)  # Create the root directory for saving data augmentations
+    
+    # Original augmentations
+    # transform_train = transforms.Compose([
+    #     RandAugment(3,4),  #from https://arxiv.org/pdf/1909.13719.pdf. For CIFAR-10 M=3, N=4
+    #     transforms.RandomHorizontalFlip(),
+    #     transforms.RandomCrop(size=32, padding=int(32*0.125), padding_mode='reflect'),
+    #     transforms.ColorJitter(
+    #         brightness=0.4,
+    #         contrast=0.4,
+    #         saturation=0.4,
+    #     ),
+    #     transforms.ToTensor(),
+    #     transforms.Normalize(mean=(0.4914, 0.4822, 0.4465), std=(0.2471, 0.2435, 0.2616)),
+    #     CutoutRandom(n_holes=1, length=16, random=True)
+    # ])
+    
+    # Augmentations from Oliver et al. (2018)
     transform_train = transforms.Compose([
-        RandAugment(3,4),  #from https://arxiv.org/pdf/1909.13719.pdf. For CIFAR-10 M=3, N=4
         transforms.RandomHorizontalFlip(),
-        transforms.RandomCrop(size=32, padding=int(32*0.125), padding_mode='reflect'),
-        transforms.ColorJitter(
-            brightness=0.4,
-            contrast=0.4,
-            saturation=0.4,
-        ),
+        transforms.RandomAffine(degrees=0, translate=(2.0 / 32.0, 2.0 / 32.0)),  # 2 pixels
         transforms.ToTensor(),
+        transforms.Lambda(lambda x: x + torch.normal(mean=0.0, std=0.15, size=x.size())),  # Gaussian noise
         transforms.Normalize(mean=(0.4914, 0.4822, 0.4465), std=(0.2471, 0.2435, 0.2616)),
-        CutoutRandom(n_holes=1, length=16, random=True)
     ])
     
     transform_val = transforms.Compose([
