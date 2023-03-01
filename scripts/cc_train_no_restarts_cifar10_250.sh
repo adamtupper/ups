@@ -34,8 +34,7 @@ module purge
 
 # Copy data and code to compute node
 mkdir $SLURM_TMPDIR/data
-tar cf $project/ups.tar.gz $project/ups
-tar xf $project/ups.tar.gz -C $SLURM_TMPDIR/ups
+cp -Rr $project/ups $SLURM_TMPDIR/ups
 tar xf $project/data/cifar-10-python.tar.gz -C $SLURM_TMPDIR/data
 
 cd $SLURM_TMPDIR/ups
