@@ -4,12 +4,11 @@
 
 seeds=(960146 663829 225659)
 
+cd $project/ups
+
 for seed in "${seeds[@]}"
 do
-    echo "Submitting jobs for seed: $seed..."
-    
-    sbatch cc_train_cifar10_1000.sh $seed
-    sleep 10
-    sbatch cc_train_cifar10_4000.sh $seed
-    sleep 10
+    echo "Submitting jobs for seed: $seed..."   
+    sbatch scripts/cc_train_wrn_cifar10_1000.sh $seed
+    sbatch scripts/cc_train_wrn_cifar10_4000.sh $seed
 done
