@@ -11,7 +11,7 @@ do
     echo "Submitting jobs for seed: $seed..."
     sbatch scripts/cc_train_no_restarts_cnn13_cifar10_250.sh $seed
     sbatch scripts/cc_train_no_restarts_cnn13_cifar10_500.sh $seed
-    sbatch scripts/cc_no_restarts_train_cnn13_cifar10_1000.sh $seed
-    sbatch scripts/cc_no_restarts_train_cnn13_cifar10_2000.sh $seed
-    sbatch scripts/cc_no_restarts_train_cnn13_cifar10_4000.sh $seed
+    sbatch scripts/cc_train_no_restarts_cnn13_cifar10_1000.sh $seed
+    sbatch scripts/cc_train_no_restarts_cnn13_cifar10_2000.sh $seed
+    sbatch scripts/cc_train_no_restarts_cnn13_cifar10_4000.sh $seed
 done
