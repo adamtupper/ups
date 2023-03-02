@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --array=1-4%1
+#SBATCH --array=1-20%1
 #SBATCH --mem=32000M
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks-per-node=8
-#SBATCH --time=3:00:00
+#SBATCH --time=12:00:00
 #SBATCH --mail-user=adam.tupper.1@ulaval.ca
 #SBATCH --mail-type=ALL
 
@@ -48,27 +48,25 @@ pip install --no-index -r cc_requirements.txt
 
 if test -d "$scratch/$exp_id"; then
     # Resume training run
-    python train-cifar-without-restarts.py \
+    python train-cifar.py \
         --out $scratch \
         --data-dir $SLURM_TMPDIR/data \
         --resume "$scratch/$exp_id" \
         --exp-name $exp_id \
-        --no-restarts \
         --dataset "cifar10" \
-        --n-lbl 250 \
+        --n-lbl 2000 \
         --seed $1 \
         --split-txt $exp_id \
         --arch "wideresnet" \
         --no-progress
 else
     # Start a new training run
-    python train-cifar-without-restarts.py \
+    python train-cifar.py \
         --out $scratch \
         --data-dir $SLURM_TMPDIR/data \
         --exp-name $exp_id \
-        --no-restarts \
         --dataset "cifar10" \
-        --n-lbl 250 \
+        --n-lbl 2000 \
         --seed $1 \
         --split-txt $exp_id \
         --arch "wideresnet" \

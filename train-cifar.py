@@ -2,29 +2,30 @@ import argparse
 import logging
 import math
 import os
+import pickle
 import random
 import shutil
 import time
-from copy import deepcopy
 from collections import OrderedDict
-import pickle
-import numpy as np
+from copy import deepcopy
+from datetime import datetime
 from re import search
+
+import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
 import torch.nn.functional as F
 import torch.optim as optim
+from data.cifar import get_cifar10, get_cifar100
+from tensorboardX import SummaryWriter
 from torch.optim.lr_scheduler import LambdaLR
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
-from tensorboardX import SummaryWriter
 from tqdm import tqdm
-from datetime import datetime
-from data.cifar import get_cifar10, get_cifar100
 from utils import AverageMeter, accuracy
-from utils.utils import *
-from utils.train_util import train_initial, train_regular
 from utils.evaluate import test
 from utils.pseudo_labeling_util import pseudo_labeling
+from utils.train_util import train_initial, train_regular
+from utils.utils import *
 
 
 def main():
@@ -33,7 +34,6 @@ def main():
     parser.add_argument('--out', help='directory to output the result')
     parser.add_argument('--data-dir', help='directory where the datasets are stored')
     parser.add_argument('--exp-name', help='a unique ID for the experiment')
-    parser.add_argument('--no-restarts', action='store_true', help="disable model restarts between iterations")
     parser.add_argument('--gpu-id', default='0', type=int,
                         help='id(s) for CUDA_VISIBLE_DEVICES')
     parser.add_argument('--n-gpu', default=1, type=int, help='number of gpus to use')

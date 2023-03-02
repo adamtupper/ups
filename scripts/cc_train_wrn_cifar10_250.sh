@@ -48,25 +48,25 @@ pip install --no-index -r cc_requirements.txt
 
 if test -d "$scratch/$exp_id"; then
     # Resume training run
-    python train-cifar-without-restarts.py \
+    python train-cifar.py \
         --out $scratch \
         --data-dir $SLURM_TMPDIR/data \
         --resume "$scratch/$exp_id" \
         --exp-name $exp_id \
         --dataset "cifar10" \
-        --n-lbl 1000 \
+        --n-lbl 250 \
         --seed $1 \
         --split-txt $exp_id \
         --arch "wideresnet" \
         --no-progress
 else
     # Start a new training run
-    python train-cifar-without-restarts.py \
+    python train-cifar.py \
         --out $scratch \
         --data-dir $SLURM_TMPDIR/data \
         --exp-name $exp_id \
         --dataset "cifar10" \
-        --n-lbl 1000 \
+        --n-lbl 250 \
         --seed $1 \
         --split-txt $exp_id \
         --arch "wideresnet" \
