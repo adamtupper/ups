@@ -2,29 +2,30 @@ import argparse
 import logging
 import math
 import os
+import pickle
 import random
 import shutil
 import time
-from copy import deepcopy
 from collections import OrderedDict
-import pickle
-import numpy as np
+from copy import deepcopy
+from datetime import datetime
 from re import search
+
+import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
 import torch.nn.functional as F
 import torch.optim as optim
+from data.cifar import get_cifar10, get_cifar100
+from tensorboardX import SummaryWriter
 from torch.optim.lr_scheduler import LambdaLR
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
-from tensorboardX import SummaryWriter
 from tqdm import tqdm
-from datetime import datetime
-from data.cifar import get_cifar10, get_cifar100
 from utils import AverageMeter, accuracy
-from utils.utils import *
-from utils.train_util import train_initial, train_regular
 from utils.evaluate import test
 from utils.pseudo_labeling_util import pseudo_labeling
+from utils.train_util import train_initial, train_regular
+from utils.utils import *
 
 
 def main():
@@ -33,7 +34,8 @@ def main():
     parser.add_argument('--out', help='directory to output the result')
     parser.add_argument('--data-dir', help='directory where the datasets are stored')
     parser.add_argument('--exp-name', help='a unique ID for the experiment')
-    parser.add_argument('--no-restarts', action='store_true', help="disable model restarts between iterations")
+    parser.add_argument('--no-restarts', action='store_true',
+                        help="disable model resets between iterations")
     parser.add_argument('--use-zca', action='store_true',
                         help="apply ZCA normalization to the data (if training on CIFAR-10)")
     parser.add_argument('--gpu-id', default='0', type=int,
@@ -105,6 +107,7 @@ def main():
     print(f'dataset:                                  {args.dataset}')
     print(f'use ZCA?:                                 {args.use_zca}')
     print(f'seed:                                     {args.seed}')
+    print(f'restarts disabled:                        {args.no_restarts}')
     print(f'train/val split:                          45K/5K')
     print(f'number of labeled samples:                {args.n_lbl}')
     print(f'architecture:                             {args.arch}')
@@ -127,6 +130,7 @@ def main():
     if args.seed != -1:
         set_seed(args)
     args.out = os.path.join(args.out, args.exp_name)
+    args.epochs = args.epchs
     start_itr = 0
 
     if args.resume and os.path.isdir(args.resume):
@@ -149,15 +153,21 @@ def main():
         args.zca_mean = zca_mean
     elif args.dataset == 'cifar100':
         args.num_classes = 100
+        
+    model = create_model(args)
+    model.to(args.device)
+    
+    if args.no_restarts:
+        # Setup the optimizer and scheduler ONCE for the entire training run (i.e. all iterations)
+        optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, nesterov=args.nesterov)
+        scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, args.iterations * args.epochs)
     
     print(f"Resuming run from iteration {start_itr}...")
     for itr in range(start_itr, args.iterations):
         if itr == 0 and args.n_lbl < 4000: #use a smaller batchsize to increase the number of iterations
             args.batch_size = 64
-            args.epochs = 1024
         else:
             args.batch_size = args.batchsize
-            args.epochs = args.epchs
 
         if os.path.exists(f'{args.out}/data/splits/{args.dataset}_basesplit_{args.n_lbl}_{args.split_txt}.pkl'):
             lbl_unlbl_split = f'{args.out}/data/splits/{args.dataset}_basesplit_{args.n_lbl}_{args.split_txt}.pkl'
@@ -172,9 +182,6 @@ def main():
         
         lbl_dataset, nl_dataset, unlbl_dataset, val_dataset, test_dataset = DATASET_GETTERS[args.dataset](args.out, args.data_dir, args.n_lbl,
                                                                 lbl_unlbl_split, pseudo_lbl_dict, itr, args.split_txt, args.seed)
-
-        model = create_model(args)
-        model.to(args.device)
 
         nl_batchsize = int((float(args.batch_size) * len(nl_dataset))/(len(lbl_dataset) + len(nl_dataset)))
 
@@ -198,7 +205,7 @@ def main():
             batch_size=nl_batchsize,
             num_workers=args.num_workers,
             drop_last=True)
-        
+
         val_loader = DataLoader(
             val_dataset,
             sampler=SequentialSampler(val_dataset),
@@ -217,11 +224,12 @@ def main():
             batch_size=args.batch_size,
             num_workers=args.num_workers)
 
-        optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, nesterov=args.nesterov)
-        args.total_steps = args.epochs * args.iteration
-        scheduler = get_cosine_schedule_with_warmup(optimizer, args.warmup * args.iteration, args.total_steps)
+        if not args.no_restarts:
+            # Setup the optimizer and scheduler each iteration
+            optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, nesterov=args.nesterov)
+            scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, args.epochs)
+        
         start_epoch = 0
-
         if args.resume and itr == start_itr and os.path.isdir(args.resume):
             resume_itrs = [int(item.replace('.pth.tar','').split("_")[-1]) for item in resume_files if 'checkpoint_iteration_' in item]
             if len(resume_itrs) > 0:
@@ -304,6 +312,11 @@ def main():
             with open(os.path.join(args.out, 'log.txt'), 'a+') as ofile:
                 ofile.write(f'Test Acc (best checkpoint): {test_acc}\n')
                 
+        if not args.no_restarts:
+            # Reset the model for the next iteration
+            model = create_model(args)
+            model.to(args.device)
+
     writer.close()
     
     with open(os.path.join(args.out, 'log.txt'), 'a+') as ofile:

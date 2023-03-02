@@ -1,12 +1,13 @@
+import os
+import pickle
+
 import numpy as np
 import torch
 from PIL import Image
 from torch.utils.data import random_split
-from torchvision import datasets
-from torchvision import transforms
-from .augmentations import RandAugment, CutoutRandom
-import pickle
-import os
+from torchvision import datasets, transforms
+
+from .augmentations import CutoutRandom, RandAugment
 
 
 def get_cifar10(splits_dir=".", root='data/datasets', n_lbl=4000, ssl_idx=None, pseudo_lbl=None, itr=0, split_txt='', seed=None):
@@ -101,7 +102,7 @@ def get_cifar10(splits_dir=".", root='data/datasets', n_lbl=4000, ssl_idx=None, 
     val_dataset = CIFAR10SSL(root, indexs=val_idx, train=True, transform=transform_val)
     test_dataset = datasets.CIFAR10(root, train=False, transform=transform_val, download=False)
 
-    if nl_idx is not None:
+    if (nl_idx is not None) and (len(nl_idx) > 0):
         return train_lbl_dataset, train_nl_dataset, train_unlbl_dataset, val_dataset, test_dataset
     else:
         return train_lbl_dataset, train_unlbl_dataset, train_unlbl_dataset, val_dataset, test_dataset
@@ -188,7 +189,7 @@ def get_cifar100(splits_dir=".", root='data/datasets', n_lbl=10000, ssl_idx=None
     val_dataset = CIFAR10SSL(root, indexs=val_idx, train=True, transform=transform_val)
     test_dataset = datasets.CIFAR100(root, train=False, transform=transform_val, download=False)
 
-    if nl_idx is not None:
+    if (nl_idx is not None) and (len(nl_idx) > 0):
         return train_lbl_dataset, train_nl_dataset, train_unlbl_dataset, val_dataset, test_dataset
     else:
         return train_lbl_dataset, train_unlbl_dataset, train_unlbl_dataset, val_dataset, test_dataset
@@ -220,14 +221,14 @@ class CIFAR10SSL(datasets.CIFAR10):
         self.targets = np.array(self.targets)
         self.nl_mask = np.ones((len(self.targets), len(np.unique(self.targets))))
         
-        if nl_mask is not None:
+        if (nl_mask is not None) and (len(nl_mask) > 0):
             self.nl_mask[nl_idx] = nl_mask
 
         if pseudo_target is not None:
             self.targets[pseudo_idx] = pseudo_target
 
         if indexs is not None:
-            indexs = np.array(indexs)
+            indexs = np.array(indexs, dtype=np.int)
             self.data = self.data[indexs]
             self.targets = np.array(self.targets)[indexs]
             self.nl_mask = np.array(self.nl_mask)[indexs]
@@ -262,14 +263,14 @@ class CIFAR100SSL(datasets.CIFAR100):
         self.targets = np.array(self.targets)
         self.nl_mask = np.ones((len(self.targets), len(np.unique(self.targets))))
         
-        if nl_mask is not None:
+        if (nl_mask is not None) and (len(nl_mask) > 0):
             self.nl_mask[nl_idx] = nl_mask
 
         if pseudo_target is not None:
             self.targets[pseudo_idx] = pseudo_target
 
         if indexs is not None:
-            indexs = np.array(indexs)
+            indexs = np.array(indexs, dtype=np.int)
             self.data = self.data[indexs]
             self.targets = np.array(self.targets)[indexs]
             self.nl_mask = np.array(self.nl_mask)[indexs]

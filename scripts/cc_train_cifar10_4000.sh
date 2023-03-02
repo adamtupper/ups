@@ -49,7 +49,7 @@ pip install --no-index -r cc_requirements.txt
 
 if test -d "$scratch/$exp_id"; then
     # Resume training run
-    python train-cifar-without-restarts.py \
+    python train-cifar.py \
         --out $scratch \
         --data-dir $SLURM_TMPDIR/data \
         --resume "$scratch/$exp_id" \
@@ -66,7 +66,7 @@ if test -d "$scratch/$exp_id"; then
         --no-progress
 else
     # Start a new training run
-    python train-cifar-without-restarts.py \
+    python train-cifar.py \
         --out $scratch \
         --data-dir $SLURM_TMPDIR/data \
         --exp-name $exp_id \

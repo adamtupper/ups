@@ -1,10 +1,12 @@
+import pickle
 import random
 import time
-import pickle
+
 import numpy as np
 import torch
 import torch.nn.functional as F
 from tqdm import tqdm
+
 from .misc import AverageMeter, accuracy, apply_zca
 
 
@@ -61,7 +63,6 @@ def train_regular(args, lbl_loader, nl_loader, model, optimizer, scheduler, epoc
         losses.update(loss.item())
 
         optimizer.step()
-        if not args.no_restarts: scheduler.step()
         model.zero_grad()
 
         batch_time.update(time.time() - end)
@@ -81,9 +82,8 @@ def train_regular(args, lbl_loader, nl_loader, model, optimizer, scheduler, epoc
             p_bar.update()
     if not args.no_progress:
         p_bar.close()
-        
-    if args.no_restarts:
-        scheduler.step()    
+
+    scheduler.step()    
     
     return losses.avg
 
@@ -114,7 +114,6 @@ def train_initial(args, train_loader, model, optimizer, scheduler, epoch, itr):
         losses.update(loss.item())
 
         optimizer.step()
-        if not args.no_restarts: scheduler.step()
         model.zero_grad()
         
         batch_time.update(time.time() - end)
@@ -134,8 +133,7 @@ def train_initial(args, train_loader, model, optimizer, scheduler, epoch, itr):
             p_bar.update()
     if not args.no_progress:
         p_bar.close()
-        
-    if args.no_restarts:
-        scheduler.step()
+
+    scheduler.step()
 
     return losses.avg

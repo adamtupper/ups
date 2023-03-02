@@ -1,10 +1,12 @@
+import pickle
 import random
 import time
-import pickle
+
 import numpy as np
 import torch
 import torch.nn.functional as F
 from tqdm import tqdm
+
 from .misc import AverageMeter, accuracy, apply_zca
 from .utils import enable_dropout
 
@@ -127,14 +129,18 @@ def pseudo_labeling(args, data_loader, model, itr):
                 current_class_idx = current_class_idx[0][sorted_maxstd_idx[:min_count]] #select the samples with lowest uncertainty 
                 blnc_idx_list.extend(current_class_idx)
 
-        blnc_idx_list = np.array(blnc_idx_list)
+        blnc_idx_list = np.array(blnc_idx_list, dtype=np.int)
         pseudo_target = pseudo_target[blnc_idx_list]
         pseudo_idx = pseudo_idx[blnc_idx_list]
         gt_target = gt_target[blnc_idx_list]
 
-    pseudo_labeling_acc = (pseudo_target == gt_target)*1
-    pseudo_labeling_acc = (sum(pseudo_labeling_acc)/len(pseudo_labeling_acc))*100
-    print(f'Pseudo-Labeling Accuracy (positive): {pseudo_labeling_acc}, Total Selected: {len(pseudo_idx)}')
+    if pseudo_idx.size > 0:
+        pseudo_labeling_acc = (pseudo_target == gt_target)*1
+        pseudo_labeling_acc = (sum(pseudo_labeling_acc)/len(pseudo_labeling_acc))*100
+        print(f'Pseudo-Labeling Accuracy (positive): {pseudo_labeling_acc}, Total Selected: {len(pseudo_idx)}')
+    else:
+        pseudo_labeling_acc = 0.0
+        print(f'No (positive) pseudo-labels selected')
 
     pseudo_nl_mask = []
     pseudo_nl_idx = []
@@ -146,7 +152,7 @@ def pseudo_labeling(args, data_loader, model, itr):
             pseudo_nl_idx.append(idx_list[i])
             nl_gt_list.append(gt_list[i])
 
-    nl_gt_list = np.array(nl_gt_list)
+    nl_gt_list = np.array(nl_gt_list, dtype=np.int)
     pseudo_nl_mask = np.array(pseudo_nl_mask)
     one_hot_targets = np.eye(args.num_classes)[nl_gt_list]
     one_hot_targets = one_hot_targets - 1
@@ -156,9 +162,15 @@ def pseudo_labeling(args, data_loader, model, itr):
     flat_one_hot_targets = flat_one_hot_targets[np.where(flat_pseudo_nl_mask == 1)]
     flat_pseudo_nl_mask = flat_pseudo_nl_mask[np.where(flat_pseudo_nl_mask == 1)]
 
-    nl_accuracy = (flat_pseudo_nl_mask == flat_one_hot_targets)*1
-    nl_accuracy_final = (sum(nl_accuracy)/len(nl_accuracy))*100
-    print(f'Pseudo-Labeling Accuracy (negative): {nl_accuracy_final}, Total Selected: {len(nl_accuracy)}, Unique Samples: {len(pseudo_nl_mask)}')
+    if flat_one_hot_targets.size > 0:
+        nl_accuracy = (flat_pseudo_nl_mask == flat_one_hot_targets)*1
+        nl_accuracy_final = (sum(nl_accuracy)/len(nl_accuracy))*100
+        print(f'Pseudo-Labeling Accuracy (negative): {nl_accuracy_final}, Total Selected: {len(nl_accuracy)}, Unique Samples: {len(pseudo_nl_mask)}')
+    else:
+        nl_accuracy = []
+        nl_accuracy_final = 0.0
+        print(f'No (negative) pseudo-labels selected')
+
     pseudo_label_dict = {'pseudo_idx': pseudo_idx.tolist(), 'pseudo_target':pseudo_target.tolist(), 'nl_idx': pseudo_nl_idx, 'nl_mask': pseudo_nl_mask.tolist()}
  
     return losses.avg, top1.avg, pseudo_labeling_acc, len(pseudo_idx), nl_accuracy_final, len(nl_accuracy), len(pseudo_nl_mask), pseudo_label_dict
