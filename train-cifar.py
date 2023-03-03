@@ -245,14 +245,14 @@ def main():
 
         model.zero_grad()
         best_acc = 0
+        val_loss = 0.0
+        val_acc = 0.0
         for epoch in range(start_epoch, args.epochs):
             if itr == 0:
                 train_loss = train_initial(args, lbl_loader, model, optimizer, scheduler, epoch, itr)
             else:
                 train_loss = train_regular(args, lbl_loader, nl_loader, model, optimizer, scheduler, epoch, itr)
 
-            val_loss = 0.0
-            val_acc = 0.0
             val_model = model
             if epoch > (args.epochs+1)/2 and epoch%args.test_freq==0:
                 val_loss, val_acc = test(args, val_loader, val_model)
