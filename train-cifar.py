@@ -204,6 +204,7 @@ def main():
         args.total_steps = args.epochs * args.iteration
         scheduler = get_cosine_schedule_with_warmup(optimizer, args.warmup * args.iteration, args.total_steps)
         start_epoch = 0
+        best_acc = 0
 
         if args.resume and itr == start_itr and os.path.isdir(args.resume):
             resume_itrs = [int(item.replace('.pth.tar','').split("_")[-1]) for item in resume_files if 'checkpoint_iteration_' in item]
@@ -219,7 +220,6 @@ def main():
                     scheduler.load_state_dict(checkpoint['scheduler'])
 
         model.zero_grad()
-        best_acc = 0
         for epoch in range(start_epoch, args.epochs):
             if itr == 0:
                 train_loss = train_initial(args, lbl_loader, model, optimizer, scheduler, epoch, itr)
