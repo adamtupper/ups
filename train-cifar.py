@@ -16,11 +16,12 @@ import torch
 import torch.backends.cudnn as cudnn
 import torch.nn.functional as F
 import torch.optim as optim
-from data.cifar import get_cifar10, get_cifar100
 from tensorboardX import SummaryWriter
 from torch.optim.lr_scheduler import LambdaLR
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from tqdm import tqdm
+
+from data.cifar import get_cifar10, get_cifar100
 from utils import AverageMeter, accuracy
 from utils.evaluate import test
 from utils.pseudo_labeling_util import pseudo_labeling
@@ -230,6 +231,8 @@ def main():
             scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, args.epochs)
         
         start_epoch = 0
+        best_acc = 0.0
+        
         if args.resume and itr == start_itr and os.path.isdir(args.resume):
             resume_itrs = [int(item.replace('.pth.tar','').split("_")[-1]) for item in resume_files if 'checkpoint_iteration_' in item]
             if len(resume_itrs) > 0:
@@ -244,7 +247,7 @@ def main():
                     scheduler.load_state_dict(checkpoint['scheduler'])
 
         model.zero_grad()
-        best_acc = 0
+        
         val_loss = 0.0
         val_acc = 0.0
         for epoch in range(start_epoch, args.epochs):
