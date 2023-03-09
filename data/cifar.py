@@ -42,11 +42,11 @@ def get_cifar10(splits_dir=".", root='data/datasets', n_lbl=4000, ssl_idx=None, 
         transforms.Normalize(mean=(0.4914, 0.4822, 0.4465), std=(0.2471, 0.2435, 0.2616))
     ])
 
+    train_idx = np.random.default_rng(seed=seed).integers(50000, size=45000)
+    val_idx = np.setdiff1d(np.arange(50000), train_idx)
+    
     if ssl_idx is None:
-        train_idx = np.random.default_rng(seed=seed).integers(50000, size=45000)
-        val_idx = np.setdiff1d(np.arange(50000), train_idx)
-        
-        base_dataset = CIFAR10SSL(root, indexs=train_idx, train=True, download=False)
+        base_dataset = CIFAR10SSL(root, indexs=None, val=False, val_idx=val_idx, train=True, download=False)
         train_lbl_idx, train_unlbl_idx = lbl_unlbl_split(base_dataset.targets, n_lbl, 10)
         
         os.makedirs(f'{splits_dir}/data/splits', exist_ok=True)
@@ -58,7 +58,6 @@ def get_cifar10(splits_dir=".", root='data/datasets', n_lbl=4000, ssl_idx=None, 
         lbl_unlbl_dict = pickle.load(open(ssl_idx, 'rb'))
         train_lbl_idx = lbl_unlbl_dict['lbl_idx']
         train_unlbl_idx = lbl_unlbl_dict['unlbl_idx']
-        val_idx = np.setdiff1d(np.arange(50000), np.concatenate((train_lbl_idx, train_unlbl_idx)))
 
     lbl_idx = train_lbl_idx
     if pseudo_lbl is not None:
@@ -86,20 +85,20 @@ def get_cifar10(splits_dir=".", root='data/datasets', n_lbl=4000, ssl_idx=None, 
         nl_mask = None
 
     train_lbl_dataset = CIFAR10SSL(
-        root, lbl_idx, train=True, transform=transform_train,
+        root, lbl_idx, val=False, val_idx=val_idx, train=True, transform=transform_train,
         pseudo_idx=pseudo_idx, pseudo_target=pseudo_target,
         nl_idx=nl_idx, nl_mask=nl_mask)
     
     if nl_idx is not None:
         train_nl_dataset = CIFAR10SSL(
-            root, np.array(nl_idx), train=True, transform=transform_train,
+            root, np.array(nl_idx), val=False, val_idx=val_idx, train=True, transform=transform_train,
             pseudo_idx=pseudo_idx, pseudo_target=pseudo_target,
             nl_idx=nl_idx, nl_mask=nl_mask)
 
     train_unlbl_dataset = CIFAR10SSL(
-    root, train_unlbl_idx, train=True, transform=transform_val)
+    root, train_unlbl_idx, val=False, val_idx=val_idx, train=True, transform=transform_val)
 
-    val_dataset = CIFAR10SSL(root, indexs=val_idx, train=True, transform=transform_val)
+    val_dataset = CIFAR10SSL(root, val=True, val_idx=val_idx, indexs=None, train=True, transform=transform_val)
     test_dataset = datasets.CIFAR10(root, train=False, transform=transform_val, download=False)
 
     if (nl_idx is not None) and (len(nl_idx) > 0):
@@ -133,7 +132,7 @@ def get_cifar100(splits_dir=".", root='data/datasets', n_lbl=10000, ssl_idx=None
         train_idx = np.random.default_rng(seed=seed).integers(50000, size=45000)
         val_idx = np.setdiff1d(np.arange(50000), train_idx)
         
-        base_dataset = CIFAR10SSL(root, indexs=train_idx, train=True, download=False)
+        base_dataset = CIFAR100SSL(root, indexs=train_idx, train=True, download=False)
         train_lbl_idx, train_unlbl_idx = lbl_unlbl_split(base_dataset.targets, n_lbl, 100)
         
         os.makedirs(f'{splits_dir}/data/splits', exist_ok=True)
@@ -209,7 +208,7 @@ def lbl_unlbl_split(lbls, n_lbl, n_class):
 
 
 class CIFAR10SSL(datasets.CIFAR10):
-    def __init__(self, root, indexs, train=True,
+    def __init__(self, root, indexs, val_idx, val, train=True,
                  transform=None, target_transform=None,
                  download=False, pseudo_idx=None, pseudo_target=None,
                  nl_idx=None, nl_mask=None):
@@ -221,20 +220,31 @@ class CIFAR10SSL(datasets.CIFAR10):
         self.targets = np.array(self.targets)
         self.nl_mask = np.ones((len(self.targets), len(np.unique(self.targets))))
         
-        if (nl_mask is not None) and (len(nl_mask) > 0):
-            self.nl_mask[nl_idx] = nl_mask
-
-        if pseudo_target is not None:
-            self.targets[pseudo_idx] = pseudo_target
-
-        if indexs is not None:
-            indexs = np.array(indexs, dtype=np.int)
-            self.data = self.data[indexs]
-            self.targets = np.array(self.targets)[indexs]
-            self.nl_mask = np.array(self.nl_mask)[indexs]
-            self.indexs = indexs
-        else:
+        if val:
+            self.data = self.data[val_idx]
+            self.targets = self.targets[val_idx]
+            self.nl_mask = self.nl_mask[val_idx]
             self.indexs = np.arange(len(self.targets))
+        else:
+            self.data = np.delete(self.data, val_idx, axis=0)
+            self.targets = np.delete(self.targets, val_idx, axis=0)
+            self.nl_mask = np.delete(self.nl_mask, val_idx, axis=0)
+            self.indexs = np.arange(len(self.targets))
+            
+            if (nl_mask is not None) and (len(nl_mask) > 0):
+                self.nl_mask[nl_idx] = nl_mask
+
+            if pseudo_target is not None:
+                self.targets[pseudo_idx] = pseudo_target
+
+            if indexs is not None:
+                indexs = np.array(indexs, dtype=np.int)
+                self.data = self.data[indexs]
+                self.targets = np.array(self.targets)[indexs]
+                self.nl_mask = np.array(self.nl_mask)[indexs]
+                self.indexs = indexs
+            else:
+                self.indexs = np.arange(len(self.targets))
         
 
     def __getitem__(self, index):
