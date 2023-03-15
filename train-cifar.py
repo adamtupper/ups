@@ -16,12 +16,11 @@ import torch
 import torch.backends.cudnn as cudnn
 import torch.nn.functional as F
 import torch.optim as optim
+from data.cifar import get_cifar10, get_cifar100
 from tensorboardX import SummaryWriter
 from torch.optim.lr_scheduler import LambdaLR
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from tqdm import tqdm
-
-from data.cifar import get_cifar10, get_cifar100
 from utils import AverageMeter, accuracy
 from utils.evaluate import test
 from utils.pseudo_labeling_util import pseudo_labeling
@@ -146,12 +145,7 @@ def main():
 
     if args.dataset == 'cifar10':
         args.num_classes = 10
-        
-        # Load ZCA for CIFAR-10
-        zca_components = np.load('zca_components.npy')
-        zca_mean = np.load('zca_mean.npy')
-        args.zca_components = zca_components
-        args.zca_mean = zca_mean
+        args.zca = None
     elif args.dataset == 'cifar100':
         args.num_classes = 100
         
@@ -181,7 +175,7 @@ def main():
         else:
             pseudo_lbl_dict = None
         
-        lbl_dataset, nl_dataset, unlbl_dataset, val_dataset, test_dataset = DATASET_GETTERS[args.dataset](args.out, args.data_dir, args.n_lbl,
+        lbl_dataset, nl_dataset, unlbl_dataset, val_dataset, test_dataset = DATASET_GETTERS[args.dataset](args, args.out, args.data_dir, args.n_lbl,
                                                                 lbl_unlbl_split, pseudo_lbl_dict, itr, args.split_txt, args.seed)
 
         nl_batchsize = int((float(args.batch_size) * len(nl_dataset))/(len(lbl_dataset) + len(nl_dataset)))
@@ -198,14 +192,14 @@ def main():
             sampler=RandomSampler(lbl_dataset),
             batch_size=lbl_batchsize,
             num_workers=args.num_workers,
-            drop_last=True)
+            drop_last=False)
 
         nl_loader = DataLoader(
             nl_dataset,
             sampler=RandomSampler(nl_dataset),
             batch_size=nl_batchsize,
             num_workers=args.num_workers,
-            drop_last=True)
+            drop_last=False)
 
         val_loader = DataLoader(
             val_dataset,

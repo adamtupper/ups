@@ -7,7 +7,7 @@ import torch
 import torch.nn.functional as F
 from tqdm import tqdm
 
-from .misc import AverageMeter, accuracy, apply_zca
+from .misc import AverageMeter, accuracy
 
 
 def train_regular(args, lbl_loader, nl_loader, model, optimizer, scheduler, epoch, itr):
@@ -26,11 +26,6 @@ def train_regular(args, lbl_loader, nl_loader, model, optimizer, scheduler, epoc
                     
         inputs_x, targets_x, _, nl_mask_x = data_x
         inputs_nl, targets_nl, _, nl_mask_nl = data_nl
-        
-        if args.dataset == 'cifar10':
-            if args.use_zca:
-                inputs_x = apply_zca(inputs_x, args.zca_mean, args.zca_components)
-                inputs_nl = apply_zca(inputs_nl, args.zca_mean, args.zca_components)
 
         inputs = torch.cat((inputs_x, inputs_nl)).to(args.device)
         targets = torch.cat((targets_x, targets_nl)).to(args.device)
@@ -100,10 +95,6 @@ def train_initial(args, train_loader, model, optimizer, scheduler, epoch, itr):
     model.train()
     for batch_idx, (inputs, targets, _, _) in enumerate(train_loader):
         data_time.update(time.time() - end)
-        
-        if args.dataset == 'cifar10':
-            if args.use_zca:
-                inputs = apply_zca(inputs, args.zca_mean, args.zca_components)
 
         inputs = inputs.to(args.device)
         targets = targets.to(args.device)

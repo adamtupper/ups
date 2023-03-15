@@ -11,17 +11,6 @@ logger = logging.getLogger(__name__)
 __all__ = ['get_mean_and_std', 'accuracy', 'AverageMeter']
 
 
-def apply_zca(data, zca_mean, zca_components):
-    """Apply ZCA normalization/whitening to data."""
-    temp = data.numpy()
-    shape = temp.shape
-    temp = temp.reshape(-1, shape[1]*shape[2]*shape[3])
-    temp = np.dot(temp - zca_mean, zca_components.T)
-    temp = temp.reshape(-1, shape[1], shape [2], shape[3])
-    data = torch.from_numpy(temp).float()
-    return data
-
-
 def get_mean_and_std(dataset):
     '''Compute the mean and std value of dataset.'''
     dataloader = torch.utils.data.DataLoader(

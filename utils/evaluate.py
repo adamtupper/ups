@@ -1,11 +1,13 @@
+import pickle
 import random
 import time
-import pickle
+
 import numpy as np
 import torch
 import torch.nn.functional as F
 from tqdm import tqdm
-from .misc import AverageMeter, accuracy, apply_zca
+
+from .misc import AverageMeter, accuracy
 
 
 def test(args, test_loader, model):
@@ -24,10 +26,6 @@ def test(args, test_loader, model):
             inputs, targets = batch[:2]
             data_time.update(time.time() - end)
             model.eval()
-            
-            if args.dataset == 'cifar10':
-                if args.use_zca:
-                    inputs = apply_zca(inputs, args.zca_mean, args.zca_components)
 
             inputs = inputs.to(args.device)
             targets = targets.to(args.device)
