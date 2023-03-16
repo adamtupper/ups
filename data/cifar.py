@@ -16,8 +16,11 @@ def gcn(images, multiplier=55, eps=1e-10):
     From Oliver et al. (2018): github.com/brain-research/realistic-ssl-evaluation/
     
     Args:
-        images: Numpy array representing the original images.
-            This function expects a rank-2 array (no H, C, W).
+        images: Numpy array of uint8s with shape = (num images, 3072). Each row of the
+            array stores a 32x32 colour image. The first 1024 entries contain the red
+            channel values, the next 1024 the green, and the final 1024 the blue. The
+            image is stored in row-major order, so that the first 32 entries of the
+            array are the red channel values of the first row of the image.
         multiplier: Post-normalization multiplier.
         eps: Small number for numerical stability.
         
@@ -40,9 +43,13 @@ def get_zca_transformer(images, identity_scale=0.1, eps=1e-10):
     From Oliver et al. (2018): github.com/brain-research/realistic-ssl-evaluation/
     
     Args:
-        images: Numpy array of flattened images, shape=(n_images, n_features)
+        images: Numpy array of uint8s with shape = (num images, 3072). Each row of the
+            array stores a 32x32 colour image. The first 1024 entries contain the red
+            channel values, the next 1024 the green, and the final 1024 the blue. The
+            image is stored in row-major order, so that the first 32 entries of the
+            array are the red channel values of the first row of the image.
         identity_scale: Scalar multiplier for identity in SVD
-        eps: Small constant to avoid divide-by-zeor
+        eps: Small constant to avoid divide-by-zero
         root_path: Optional path to save the ZCA params to.
     
     Returns:
@@ -59,10 +66,36 @@ def get_zca_transformer(images, identity_scale=0.1, eps=1e-10):
 
 
 def unflatten(images):
+    """Takes a numpy array of flattened images with shape = (N, 3072) and reshapes them
+    to (N, 32, 32, 3), where N is the number of images.
+
+    Args:
+        images (np.ndarray): Array with shape = (N, 3072). Each row of the
+            array stores a 32x32 colour image. The first 1024 entries contain the red
+            channel values, the next 1024 the green, and the final 1024 the blue. The
+            image is stored in row-major order, so that the first 32 entries of the
+            array are the red channel values of the first row of the image.
+
+    Returns:
+        np.ndarray: Array with shape = (N, 32, 32, 3) and RGB channel ordering.
+    """
     return images.reshape((-1, 3, 32, 32)).transpose([0, 2, 3, 1])
 
 
 def flatten(images):
+    """Takes a numpy array of images with shape = (N, 32, 32, 3) and reshapes them
+    to (N, 3072), where N is the number of images.
+
+    Args:
+        images (np.ndarray): Array with shape = (N, 32, 32, 3) and RGB channel ordering.
+
+    Returns:
+        np.ndarray: Array with shape = (N, 3072). Each row of the array stores a 32 x 32
+            colour image. The first 1024 entries contain the red channel values, the
+            next 1024 the green, and the final 1024 the blue. The image is stored in
+            row-major order, so that the first 32 entries of the array are the red
+            channel values of the first row of the image.
+    """
     return images.transpose([0, 3, 1, 2]).reshape((-1, 3072))
 
 
