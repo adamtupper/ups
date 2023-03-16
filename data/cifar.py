@@ -233,13 +233,13 @@ def get_cifar100(args, splits_dir=".", root='data/datasets', n_lbl=10000, ssl_id
         transforms.ToTensor(),
         transforms.Normalize(mean=(0.5071, 0.4867, 0.4408), std=(0.2675, 0.2565, 0.2761))
     ])
+    
+    train_idx = np.random.default_rng(seed=seed).choice(50000, size=45000, replace=False)
+    val_idx = np.setdiff1d(np.arange(50000), train_idx)
 
     if ssl_idx is None:
-        train_idx = np.random.default_rng(seed=seed).integers(50000, size=45000)
-        val_idx = np.setdiff1d(np.arange(50000), train_idx)
-        
         base_dataset = CIFAR100SSL(root, indexs=train_idx, train=True, download=False)
-        train_lbl_idx, train_unlbl_idx = lbl_unlbl_split(base_dataset.targets, n_lbl, 100)
+        train_lbl_idx, train_unlbl_idx = lbl_unlbl_split(base_dataset.indexs, base_dataset.targets, n_lbl, 100)
         
         os.makedirs(f'{splits_dir}/data/splits', exist_ok=True)
         f = open(os.path.join(f'{splits_dir}/data/splits', f'cifar100_basesplit_{n_lbl}_{split_txt}.pkl'),"wb")
@@ -250,7 +250,6 @@ def get_cifar100(args, splits_dir=".", root='data/datasets', n_lbl=10000, ssl_id
         lbl_unlbl_dict = pickle.load(open(ssl_idx, 'rb'))
         train_lbl_idx = lbl_unlbl_dict['lbl_idx']
         train_unlbl_idx = lbl_unlbl_dict['unlbl_idx']
-        val_idx = np.setdiff1d(np.arange(50000), np.concatenate((train_lbl_idx, train_unlbl_idx)))
 
     lbl_idx = train_lbl_idx
     if pseudo_lbl is not None:
@@ -278,20 +277,32 @@ def get_cifar100(args, splits_dir=".", root='data/datasets', n_lbl=10000, ssl_id
         nl_mask = None
 
     train_lbl_dataset = CIFAR100SSL(
-        root, lbl_idx, train=True, transform=transform_train,
-        pseudo_idx=pseudo_idx, pseudo_target=pseudo_target,
-        nl_idx=nl_idx, nl_mask=nl_mask)
+        root,
+        lbl_idx,
+        train=True,
+        transform=transform_train,
+        pseudo_idx=pseudo_idx,
+        pseudo_target=pseudo_target,
+        nl_idx=nl_idx,
+        nl_mask=nl_mask
+    )
     
     if nl_idx is not None:
         train_nl_dataset = CIFAR100SSL(
-            root, np.array(nl_idx), train=True, transform=transform_train,
-            pseudo_idx=pseudo_idx, pseudo_target=pseudo_target,
-            nl_idx=nl_idx, nl_mask=nl_mask)
+            root,
+            np.array(nl_idx),
+            train=True,
+            transform=transform_train,
+            pseudo_idx=pseudo_idx,
+            pseudo_target=pseudo_target,
+            nl_idx=nl_idx,
+            nl_mask=nl_mask
+        )
 
     train_unlbl_dataset = CIFAR100SSL(
     root, train_unlbl_idx, train=True, transform=transform_val)
 
-    val_dataset = CIFAR10SSL(root, indexs=val_idx, zca_transform=args.zca, train=True, transform=transform_val)
+    val_dataset = CIFAR100SSL(root, indexs=val_idx, train=True, transform=transform_val, download=False)
     test_dataset = datasets.CIFAR100(root, train=False, transform=transform_val, download=False)
 
     if (nl_idx is not None) and (len(nl_idx) > 0):
