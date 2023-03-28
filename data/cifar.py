@@ -332,11 +332,11 @@ class CIFAR10Preprocessed(datasets.CIFAR10):
         images = flatten(self.data)
         
         # Apply global contrast normalization (GCN)
-        self.data = gcn(images)
+        images = gcn(images)
         
         if zca_transform is not None:
             # Apply ZCA whitening
-            flattened_images = zca_transform(images)
+            images = zca_transform(images)
         
         # Unflatten images
         self.data = unflatten(images)
