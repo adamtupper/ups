@@ -97,7 +97,7 @@ def main():
                         help='model width for WRN-28')
     parser.add_argument('--model-depth', default=28, type=int,
                         help='model depth for WRN')
-    parser.add_argument('--test-freq', default=10, type=int,
+    parser.add_argument('--test-freq', default=1, type=int,
                         help='frequency of evaluations')
     
     args = parser.parse_args()
