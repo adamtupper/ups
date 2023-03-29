@@ -109,26 +109,26 @@ def get_cifar10(args, splits_dir=".", root='data/datasets', n_lbl=4000, ssl_idx=
         args.zca = get_zca_transformer(images)
     
     # Original augmentations
-    # transform_train = transforms.Compose([
-    #     RandAugment(3,4),  #from https://arxiv.org/pdf/1909.13719.pdf. For CIFAR-10 M=3, N=4
-    #     transforms.RandomHorizontalFlip(),
-    #     transforms.RandomCrop(size=32, padding=int(32*0.125), padding_mode='reflect'),
-    #     transforms.ColorJitter(
-    #         brightness=0.4,
-    #         contrast=0.4,
-    #         saturation=0.4,
-    #     ),
-    #     transforms.ToTensor(),
-    #     CutoutRandom(n_holes=1, length=16, random=True),
-    # ])
+    transform_train = transforms.Compose([
+        RandAugment(3,4),  #from https://arxiv.org/pdf/1909.13719.pdf. For CIFAR-10 M=3, N=4
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomCrop(size=32, padding=int(32*0.125), padding_mode='reflect'),
+        transforms.ColorJitter(
+            brightness=0.4,
+            contrast=0.4,
+            saturation=0.4,
+        ),
+        transforms.ToTensor(),
+        CutoutRandom(n_holes=1, length=16, random=True),
+    ])
     
     # Augmentations from Oliver et al. (2018)
-    transform_train = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomAffine(degrees=0, translate=(2.0 / 32.0, 2.0 / 32.0)),  # 2 pixels
-        transforms.Lambda(lambda x: x + torch.normal(mean=0.0, std=0.15, size=x.size())),  # Gaussian noise
-    ])
+    # transform_train = transforms.Compose([
+    #     transforms.ToTensor(),
+    #     transforms.RandomHorizontalFlip(),
+    #     transforms.RandomAffine(degrees=0, translate=(2.0 / 32.0, 2.0 / 32.0)),  # 2 pixels
+    #     transforms.Lambda(lambda x: x + torch.normal(mean=0.0, std=0.15, size=x.size())),  # Gaussian noise
+    # ])
     
     transform_val = transforms.Compose([
         transforms.ToTensor(),
