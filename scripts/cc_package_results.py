@@ -39,6 +39,7 @@ def process_lines(lines):
     arch = None
     iters = None
     epochs = None
+    data_aug = None
 
     for line in lines:
         if experiment is None:
@@ -55,8 +56,10 @@ def process_lines(lines):
             iters = extract(line, "number of pseudo-labeling iterations:")
         if epochs is None:
             epochs = extract(line, "number of epochs:")
+        if data_aug is not None:
+            data_aug = extract(line, "data augmentation strategy:")
 
-    return experiment, dataset, num_labels, seed, arch, iters, epochs
+    return experiment, dataset, num_labels, seed, arch, iters, epochs, data_aug
 
 
 def main():
@@ -72,7 +75,7 @@ def main():
         # Extract metadata from first the log file
         log_file = open(slurm_logs[0], "r")
         lines = log_file.readlines()
-        experiment, dataset, num_labels, seed, arch, iters, epochs = process_lines(
+        experiment, dataset, num_labels, seed, arch, iters, epochs, data_aug = process_lines(
             lines
         )
 
@@ -82,7 +85,7 @@ def main():
             shutil.copy2(log_file, experiment_dir)
 
         # Compile output files into compressed tarball
-        tar_file = f"{dataset}_{num_labels}_{seed}_{arch}_iters{iters}_epochs{epochs}_exp{experiment}_job{id}.tar.gz"
+        tar_file = f"{dataset}_{num_labels}_{seed}_{arch}_iters{iters}_epochs{epochs}_{data_aug}_exp{experiment}_job{id}.tar.gz"
         with tarfile.open(os.path.join(args.artifacts_dir, tar_file), "w:gz") as tar:
             tar.add(experiment_dir, arcname=os.path.basename(experiment_dir))
 
