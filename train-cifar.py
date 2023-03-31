@@ -99,6 +99,7 @@ def main():
                         help='model depth for WRN')
     parser.add_argument('--test-freq', default=1, type=int,
                         help='frequency of evaluations')
+    parser.add_argument('--data-aug', type=str, required=True, help='Data augmentation setting (none, weak, or strong)')
     
     args = parser.parse_args()
     #print key configurations

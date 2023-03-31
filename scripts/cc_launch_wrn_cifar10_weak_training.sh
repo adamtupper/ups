@@ -9,9 +9,9 @@ cd $project/ups
 for seed in "${seeds[@]}"
 do
     echo "Submitting jobs for seed: $seed..."
-    sbatch scripts/cc_train_wrn_cifar10_250.sh $seed
-    sbatch scripts/cc_train_wrn_cifar10_500.sh $seed
-    sbatch scripts/cc_train_wrn_cifar10_1000.sh $seed
-    sbatch scripts/cc_train_wrn_cifar10_2000.sh $seed
-    sbatch scripts/cc_train_wrn_cifar10_4000.sh $seed
+    sbatch scripts/cc_train_wrn_cifar10_250.sh $seed weak
+    sbatch scripts/cc_train_wrn_cifar10_500.sh $seed weak
+    sbatch scripts/cc_train_wrn_cifar10_1000.sh $seed weak
+    sbatch scripts/cc_train_wrn_cifar10_2000.sh $seed weak
+    sbatch scripts/cc_train_wrn_cifar10_4000.sh $seed weak
 done

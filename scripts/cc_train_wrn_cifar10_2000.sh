@@ -14,11 +14,17 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-# Check for (optional) experiment ID for resuming a previous training job
+# Check for data augmentation strategy
 if [ -z "$2" ]; then
+    echo "No data augmentation strategy supplied"
+    exit 1
+fi
+
+# Check for (optional) experiment ID for resuming a previous training job
+if [ -z "$3" ]; then
     exp_id="UPS_$SLURM_ARRAY_JOB_ID"
 else
-    exp_id=$2
+    exp_id=$3
 fi
 
 # Print Job info
@@ -62,7 +68,8 @@ if test -d "$scratch/$exp_id"; then
         --seed $1 \
         --split-txt $exp_id \
         --arch "wideresnet" \
-        --no-progress
+        --no-progress \
+        --data-aug $2
 else
     # Start a new training run
     python train-cifar.py \
@@ -78,5 +85,6 @@ else
         --seed $1 \
         --split-txt $exp_id \
         --arch "wideresnet" \
-        --no-progress
+        --no-progress \
+        --data-aug $2
 fi
