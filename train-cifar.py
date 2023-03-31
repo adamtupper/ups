@@ -36,8 +36,6 @@ def main():
     parser.add_argument('--exp-name', help='a unique ID for the experiment')
     parser.add_argument('--no-restarts', action='store_true',
                         help="disable model resets between iterations")
-    parser.add_argument('--use-zca', action='store_true',
-                        help="apply ZCA normalization to the data (if training on CIFAR-10)")
     parser.add_argument('--gpu-id', default='0', type=int,
                         help='id(s) for CUDA_VISIBLE_DEVICES')
     parser.add_argument('--n-gpu', default=1, type=int, help='number of gpus to use')
@@ -106,7 +104,7 @@ def main():
     print('########################################################################')
     print('########################################################################')
     print(f'dataset:                                  {args.dataset}')
-    print(f'use ZCA?:                                 {args.use_zca}')
+    print(f'data augmentation strategy:               {args.data_aug}')
     print(f'seed:                                     {args.seed}')
     print(f'restarts disabled:                        {args.no_restarts}')
     print(f'train/val split:                          45K/5K')
