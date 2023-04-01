@@ -144,7 +144,6 @@ def main():
 
     if args.dataset == 'cifar10':
         args.num_classes = 10
-        args.zca = None
     elif args.dataset == 'cifar100':
         args.num_classes = 100
         

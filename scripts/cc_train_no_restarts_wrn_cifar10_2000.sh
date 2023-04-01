@@ -58,7 +58,6 @@ if test -d "$scratch/$exp_id"; then
         --class-blnc 10 \
         --no-restarts \
         --dataset "cifar10" \
-        --use-zca \
         --n-lbl 2000 \
         --seed $1 \
         --split-txt $exp_id \
@@ -75,7 +74,6 @@ else
         --class-blnc 10 \
         --no-restarts \
         --dataset "cifar10" \
-        --use-zca \
         --n-lbl 2000 \
         --seed $1 \
         --split-txt $exp_id \
