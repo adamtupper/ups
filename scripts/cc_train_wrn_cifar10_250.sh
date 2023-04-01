@@ -67,7 +67,7 @@ if test -d "$scratch/$exp_id"; then
         --seed $1 \
         --split-txt $exp_id \
         --arch "wideresnet" \
-        --no-progress \ 
+        --no-progress \
         --data-aug $2
 else
     # Start a new training run
@@ -83,6 +83,6 @@ else
         --seed $1 \
         --split-txt $exp_id \
         --arch "wideresnet" \
-        --no-progress \ 
+        --no-progress \
         --data-aug $2
 fi
