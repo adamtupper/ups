@@ -1,10 +1,12 @@
 import pickle
 import random
+import sys
 import time
 
 import numpy as np
 import torch
 import torch.nn.functional as F
+import torchvision
 from tqdm import tqdm
 
 from .misc import AverageMeter, accuracy
@@ -95,6 +97,11 @@ def train_initial(args, train_loader, model, optimizer, scheduler, epoch, itr):
     model.train()
     for batch_idx, (inputs, targets, _, _) in enumerate(train_loader):
         data_time.update(time.time() - end)
+
+        # # Check data augmentations
+        # img_grid = torchvision.utils.make_grid(inputs, nrow=8, padding=2, normalize=True, range=None, scale_each=False, pad_value=0)
+        # torchvision.utils.save_image(img_grid, 'augmentations.png')
+        # sys.exit()
 
         inputs = inputs.to(args.device)
         targets = targets.to(args.device)

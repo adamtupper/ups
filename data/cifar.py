@@ -19,6 +19,7 @@ def get_cifar10(args, splits_dir=".", root='data/datasets', n_lbl=4000, ssl_idx=
     if args.data_aug == "none":
         transform_train = transforms.Compose([
             transforms.ToTensor(),
+            transforms.Normalize(mean, std)
         ])
     elif args.data_aug == "weak":
         transform_train = transforms.Compose([
@@ -42,6 +43,7 @@ def get_cifar10(args, splits_dir=".", root='data/datasets', n_lbl=4000, ssl_idx=
     
     transform_val = transforms.Compose([
         transforms.ToTensor(),
+        transforms.Normalize(mean, std)
     ])
 
     train_idx = np.random.default_rng(seed=seed).choice(50000, size=45000, replace=False)
